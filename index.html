@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Plan de Entrenamiento — Maxi</title>
+<style>
+  :root{
+    --bg: #121212;
+    --bg-elev: #1B1B1B;
+    --bg-card: #1F1F1F;
+    --bg-card-2: #242424;
+    --line: #333333;
+    --line-soft: #2A2A2A;
+    --text: #F2F0EA;
+    --text-dim: #A8A6A0;
+    --text-faint: #76746E;
+    --cyan: #4FB3FF;
+    --cyan-dim: #123049;
+    --lime: #C8FF3D;
+    --lime-dim: #2C3713;
+    --blue: #4DA6FF;
+    --font-display: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", "Roboto Mono", "Courier New", monospace;
+    --radius: 10px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body{ margin:0; padding:0; background: var(--bg); color: var(--text); }
+  body{
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+  }
+  #root{ min-height: 100vh; }
+  h1,h2,h3,h4{ margin:0; font-family: var(--font-display); letter-spacing: -0.02em; font-weight: 900; text-transform: uppercase; }
+  button{ font-family: inherit; cursor: pointer; }
+  input, textarea{ font-family: inherit; }
+  ::-webkit-scrollbar{ display:none; }
+  *{ scrollbar-width: none; }
+
+  .app{ max-width: 720px; margin: 0 auto; padding-bottom: 60px; }
+
+  /* HEADER */
+  .topbar{
+    position: sticky; top:0; z-index: 50;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: calc(14px + var(--safe-top)) 16px 0 16px;
+  }
+  .brand-row{ display:flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .brand{ display:flex; align-items:baseline; gap:8px; min-width: 0; }
+  .brand h1{ font-size: 15px; line-height: 1.25; color: var(--text); word-break: break-word; }
+  .brand .accent{ color: var(--cyan); }
+  .brand-sub{ font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; }
+  .reset-btn{
+    flex: 0 0 auto;
+    background:none; border: 1px solid var(--line); color: var(--text-faint);
+    border-radius: 6px; padding: 5px 9px; font-size: 11px; font-family: var(--font-mono);
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .reset-btn:active{ background: var(--bg-card); }
+
+  /* TRACK PROGRESS BAR (signature element) */
+  .track-wrap{ padding: 2px 0 14px 0; }
+  .track-label-row{ display:flex; justify-content: space-between; align-items:baseline; margin-bottom: 6px; }
+  .track-label{ font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+  .track-label b{ color: var(--lime); font-weight: 700; }
+  .track-lanes{ display:flex; gap: 3px; height: 6px; }
+  .lane{ flex:1; border-radius: 2px; background: var(--line-soft); position: relative; overflow:hidden; }
+  .lane.done{ background: var(--lime); }
+  .lane.current{ background: var(--cyan); }
+
+  /* WEEK SELECTOR PILLS */
+  .week-scroller{
+    display:flex; gap: 6px; overflow-x: auto; padding: 0 0 12px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .week-pill{
+    flex: 0 0 auto;
+    min-width: 40px;
+    padding: 7px 0;
+    text-align:center;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 700;
+  }
+  .week-pill.active{ background: var(--cyan); border-color: var(--cyan); color: #04202E; }
+  .week-pill.complete:not(.active){ border-color: var(--lime); color: var(--lime); }
+
+  /* BLOCK BANNER */
+  .block-banner{
+    margin: 0 16px 14px 16px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    border-left: 3px solid var(--cyan);
+  }
+  .block-banner .b-title{ font-size: 11px; font-family: var(--font-mono); color: var(--cyan); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+  .block-banner .b-sub{ font-size: 13px; color: var(--text-dim); }
+
+  /* DAY NAV */
+  .day-nav{
+    display:flex; gap: 6px; overflow-x:auto; padding: 0 16px 12px 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .day-tab{
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    display:flex; align-items:center; gap:6px;
+  }
+  .day-tab.active{ background: var(--bg-card-2); border-color: var(--text-dim); color: var(--text); }
+  .day-tab .dot{ width:6px; height:6px; border-radius:50%; background: var(--line); }
+  .day-tab .dot.done{ background: var(--lime); }
+  .type-badge{
+    font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.03em;
+    padding: 1px 5px; border-radius: 4px;
+  }
+  .type-Fuerza{ background: var(--cyan-dim); color: #A9DBFF; }
+  .type-Carrera{ background: #163047; color: var(--blue); }
+  .type-Hibrido, .type-Fuerza\/Hibrido{ background: var(--lime-dim); color: var(--lime); }
+  .type-Regenerativo, .type-Carrera\/Regenerativo{ background: #2A2A2A; color: var(--text-dim); }
+  .type-Descanso, .type-Pre-competencia{ background: #2A2A2A; color: var(--text-dim); }
+
+  /* SESSION CONTENT */
+  .session{ padding: 0 16px; }
+  .session-head{ margin-bottom: 14px; }
+  .session-head h2{ font-size: 21px; color: var(--text); margin-bottom: 4px; }
+  .session-notes{
+    font-size: 13px; color: var(--text-dim); line-height: 1.55;
+    background: var(--bg-card); border-radius: var(--radius); padding: 10px 12px;
+    border: 1px solid var(--line-soft);
+    margin-bottom: 16px;
+  }
+  .session-notes b{ color: var(--lime); }
+
+  .phase{ margin-bottom: 18px; }
+  .phase-head{
+    display:flex; align-items:center; gap:8px;
+    margin-bottom: 8px;
+  }
+  .phase-bar{ width: 4px; height: 16px; border-radius: 2px; background: var(--cyan); }
+  .phase-head h3{ font-size: 13px; color: var(--text); letter-spacing: 0; text-transform: none; font-weight: 700; font-family: var(--font-body); }
+
+  .ex-card{
+    background: var(--bg-card);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  .ex-top{ display:flex; justify-content: space-between; align-items:flex-start; gap: 8px; margin-bottom: 6px; }
+  .ex-name{ font-size: 14.5px; font-weight: 700; color: var(--text); }
+  .ex-detail{ font-size: 12.5px; color: var(--text-dim); margin-top: 2px; line-height: 1.4; }
+  .video-btn{
+    flex: 0 0 auto;
+    background: var(--bg-elev); border: 1px solid var(--line); color: var(--text-dim);
+    border-radius: 6px; width: 30px; height: 30px;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 13px;
+  }
+  .video-btn.has-link{ border-color: var(--blue); color: var(--blue); }
+  .ex-meta-row{
+    display:flex; gap: 14px; margin: 8px 0 10px 0;
+    font-family: var(--font-mono); font-size: 11.5px;
+  }
+  .ex-meta-item{ color: var(--text-dim); }
+  .ex-meta-item b{ color: var(--text); font-weight: 700; display:block; font-size: 12.5px; margin-top: 1px; }
+  .ex-meta-label{ text-transform: uppercase; letter-spacing: 0.04em; font-size: 9.5px; color: var(--text-faint); }
+
+  .track-grid{
+    display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;
+  }
+  .track-field label{
+    display:block; font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase;
+    letter-spacing: 0.04em; color: var(--text-faint); margin-bottom: 4px;
+  }
+  .track-field input, .track-field textarea{
+    width: 100%; background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 6px; color: var(--text); padding: 7px 8px; font-size: 13px;
+  }
+  .track-field input:focus, .track-field textarea:focus, .video-input:focus{
+    outline: none; border-color: var(--cyan);
+  }
+  .track-field.full{ grid-column: 1 / -1; }
+  .track-field textarea{ resize: vertical; min-height: 34px; font-family: var(--font-body); }
+
+  .video-row{ display:flex; gap: 6px; margin-top: 4px; }
+  .video-input{
+    flex:1; background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 6px; color: var(--blue); padding: 6px 8px; font-size: 12px;
+  }
+  .video-go{
+    background: none; border: 1px solid var(--line); color: var(--text-dim);
+    border-radius: 6px; padding: 0 10px; font-size: 12px;
+  }
+
+  .ex-check{
+    display:flex; align-items:center; gap: 8px; margin-top: 8px;
+    padding-top: 8px; border-top: 1px solid var(--line-soft);
+  }
+  .ex-check input[type=checkbox]{
+    width: 18px; height: 18px; accent-color: var(--lime);
+  }
+  .ex-check span{ font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.03em; }
+
+  .complete-day-btn{
+    width: 100%; padding: 14px; margin-top: 8px; margin-bottom: 24px;
+    border-radius: var(--radius); border: none;
+    background: var(--cyan); color: #04202E;
+    font-family: var(--font-display); font-size: 14px; letter-spacing: 0.02em;
+  }
+  .complete-day-btn.done{ background: var(--lime); }
+  .complete-day-btn:active{ opacity: 0.85; }
+
+  /* BLOQUE / GUIA SECTIONS */
+  .info-section{ padding: 0 16px; margin-bottom: 28px; }
+  .info-card{
+    background: var(--bg-card); border: 1px solid var(--line-soft); border-radius: var(--radius);
+    padding: 14px; margin-bottom: 10px;
+  }
+  .info-card h3{ font-size: 13px; color: var(--lime); margin-bottom: 6px; font-family: var(--font-body); font-weight: 700; text-transform: none; }
+  .info-card p{ font-size: 13px; color: var(--text-dim); line-height: 1.6; margin: 0 0 6px 0; }
+  .info-card p:last-child{ margin-bottom: 0; }
+  .info-card ul{ margin: 0; padding-left: 18px; }
+  .info-card li{ font-size: 13px; color: var(--text-dim); line-height: 1.6; margin-bottom: 4px; }
+
+  /* TOP NAV TABS (main sections) */
+  .main-tabs{
+    display:flex; gap: 4px; padding: 0 16px 12px 16px;
+  }
+  .main-tab{
+    flex:1; text-align:center; padding: 9px 4px;
+    border-radius: 8px; border: 1px solid var(--line);
+    background: var(--bg-elev); color: var(--text-dim);
+    font-size: 12px; font-weight: 700;
+  }
+  .main-tab.active{ background: var(--text); color: var(--bg); border-color: var(--text); }
+
+  .section-title{
+    font-size: 17px; color: var(--text); padding: 4px 16px 12px 16px;
+  }
+
+  .stat-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px; margin-bottom: 20px; }
+  .stat-card{ background: var(--bg-card); border-radius: var(--radius); padding: 12px; }
+  .stat-card .s-label{ font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; color: var(--text-faint); letter-spacing: 0.04em; }
+  .stat-card .s-val{ font-size: 24px; font-weight: 700; color: var(--lime); margin-top: 2px; font-family: var(--font-display); }
+
+  .footer-note{
+    text-align:center; color: var(--text-faint); font-size: 11px; padding: 20px 24px;
+    font-family: var(--font-mono);
+  }
+
+  @media (min-width: 600px){
+    .track-grid{ grid-template-columns: 1fr 1fr 1fr; }
+  }
+
+  /* ── COMPROMISED RUNNING BLOCK ── */
+  .cr-block{
+    background: var(--bg-card); border: 1px solid var(--line-soft);
+    border-radius: var(--radius); margin-bottom: 18px; overflow: hidden;
+  }
+  .cr-header{
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 14px; border-bottom: 1px solid var(--line-soft);
+    gap: 10px;
+  }
+  .cr-header-left{ display: flex; align-items: center; gap: 10px; }
+  .cr-letter{
+    width: 26px; height: 26px; border-radius: 50%; flex: 0 0 auto;
+    background: var(--cyan-dim); color: var(--cyan);
+    font-family: var(--font-display); font-size: 12px;
+    display: flex; align-items: center; justify-content: center; font-weight: 900;
+  }
+  .cr-title{ font-size: 14px; font-weight: 700; color: var(--text); }
+  .cr-rounds-badge{
+    background: var(--cyan-dim); color: var(--cyan);
+    font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .cr-time{ font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); white-space: nowrap; }
+  .cr-hint{
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 9px 14px; border-bottom: 1px solid var(--line-soft);
+    font-size: 12px; color: var(--cyan); line-height: 1.45;
+    background: #0C2733;
+  }
+  .cr-hint-icon{ flex: 0 0 auto; margin-top: 1px; }
+  .cr-table{ width: 100%; border-collapse: collapse; }
+  .cr-table-head tr th{
+    font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-faint); padding: 8px 14px 6px 14px;
+    text-align: left; border-bottom: 1px solid var(--line-soft);
+  }
+  .cr-table-head tr th:nth-child(2),
+  .cr-table-head tr th:nth-child(3),
+  .cr-table-head tr th:nth-child(4){ text-align: right; }
+  .cr-row{ border-bottom: 1px solid var(--line-soft); }
+  .cr-row:last-child{ border-bottom: none; }
+  .cr-row td{ padding: 0; vertical-align: top; }
+  .cr-row-main{ display: flex; align-items: stretch; }
+  .cr-step-num{
+    width: 32px; flex: 0 0 32px;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding-top: 13px;
+    font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+    color: var(--text-faint);
+  }
+  .cr-step-body{ flex: 1; padding: 10px 14px 10px 0; }
+  .cr-step-name{ font-size: 13.5px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .cr-step-detail{ font-size: 11.5px; color: var(--text-dim); line-height: 1.4; }
+  .cr-step-meta{
+    display: flex; gap: 16px; margin-top: 6px;
+    font-family: var(--font-mono); font-size: 11px;
+  }
+  .cr-meta-qty{ color: var(--text); font-weight: 700; }
+  .cr-meta-rpe{ color: var(--lime); font-weight: 700; }
+  .cr-meta-z2{ color: var(--blue); font-weight: 700; }
+  .cr-meta-pause{ color: var(--text-dim); }
+  .cr-tracking{
+    margin: 0 14px 10px 32px;
+    background: var(--bg-elev); border-radius: 7px; padding: 8px 10px;
+    border: 1px solid var(--line-soft);
+  }
+  .cr-track-row{ display: flex; gap: 8px; margin-bottom: 6px; }
+  .cr-track-field{ flex: 1; }
+  .cr-track-field label{
+    display: block; font-family: var(--font-mono); font-size: 9px;
+    text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-faint); margin-bottom: 3px;
+  }
+  .cr-track-field input, .cr-track-field textarea{
+    width: 100%; background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 5px; color: var(--text); padding: 5px 7px; font-size: 12px;
+    font-family: inherit;
+  }
+  .cr-track-field input:focus, .cr-track-field textarea:focus{ outline: none; border-color: var(--cyan); }
+  .cr-track-field textarea{ resize: vertical; min-height: 28px; }
+  .cr-video-row{ display: flex; gap: 5px; margin-bottom: 6px; }
+  .cr-video-input{
+    flex: 1; background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 5px; color: var(--blue); padding: 5px 7px; font-size: 11px;
+    font-family: inherit;
+  }
+  .cr-video-input:focus{ outline: none; border-color: var(--blue); }
+  .cr-video-btn{
+    background: none; border: 1px solid var(--line); color: var(--text-faint);
+    border-radius: 5px; padding: 0 8px; font-size: 11px;
+  }
+  .cr-check{ display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .cr-check input{ accent-color: var(--lime); width: 15px; height: 15px; }
+  .cr-check span{ font-size: 11px; color: var(--text-faint); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.03em; }
+  .cr-divider{
+    height: 1px; background: var(--line-soft); margin: 0 14px;
+  }
+
+  /* ── EXERCISE CARD v2 (fases A, B, D) — tabla de series ── */
+  .ex-card2{
+    background: var(--bg-card); border: 1px solid var(--line-soft);
+    border-radius: var(--radius); padding: 14px 14px 10px 14px;
+    margin-bottom: 10px;
+  }
+  .ex2-header{
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 10px; margin-bottom: 4px;
+  }
+  .ex2-name{
+    font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3;
+  }
+  .ex2-badges{
+    display: flex; align-items: center; gap: 5px; flex-wrap: wrap; flex-shrink: 0;
+  }
+  .badge-series, .badge-reps{
+    font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 5px; text-transform: uppercase;
+    letter-spacing: 0.03em; white-space: nowrap;
+  }
+  .badge-series{ background: var(--bg-elev); color: var(--text-dim); border: 1px solid var(--line); }
+  .badge-reps{ background: var(--bg-elev); color: var(--text-dim); border: 1px solid var(--line); }
+  .badge-int{ font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+  .badge-rpe{ background: var(--lime-dim); color: var(--lime); }
+  .badge-rir{ background: var(--lime-dim); color: var(--lime); }
+  .badge-z2{ background: #163047; color: var(--blue); }
+  .badge-z3{ background: #163047; color: var(--blue); }
+  .badge-z4{ background: #0E2B38; color: #A9DBFF; }
+  .ex2-detail{ font-size: 12.5px; color: var(--text-dim); line-height: 1.4; margin-bottom: 3px; }
+  .ex2-descanso{ font-size: 12px; color: var(--text-faint); margin-bottom: 8px; }
+  .ex2-video-row{
+    display: flex; gap: 6px; margin-bottom: 10px;
+  }
+  .ex2-video-input{
+    flex: 1; background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 7px; color: var(--blue); padding: 7px 10px; font-size: 12px;
+    font-family: inherit;
+  }
+  .ex2-video-input:focus{ outline: none; border-color: var(--blue); }
+  .ex2-video-input::placeholder{ color: var(--text-faint); }
+  .ex2-video-go{
+    background: none; border: 1px solid var(--blue); color: var(--blue);
+    border-radius: 7px; padding: 0 12px; font-size: 13px;
+  }
+  .ex2-series-block{ margin-bottom: 8px; }
+  .ex2-series-label{
+    font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-faint); margin-bottom: 6px;
+  }
+  .ex2-series-table{ display: flex; flex-direction: column; gap: 0; }
+  .ex2-series-thead{
+    display: grid; grid-template-columns: 44px 1fr 1fr;
+    padding: 0 0 4px 0; margin-bottom: 2px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .ex2-th-serie, .ex2-th-kg, .ex2-th-reps{
+    font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase;
+    letter-spacing: 0.04em; color: var(--text-faint); padding: 0 4px;
+  }
+  .ex2-series-row{
+    display: grid; grid-template-columns: 44px 1fr 1fr;
+    align-items: center; gap: 0;
+    border-bottom: 1px solid var(--line-soft); padding: 4px 0;
+  }
+  .ex2-series-row:last-child{ border-bottom: none; }
+  .ex2-td-serie{
+    font-family: var(--font-mono); font-size: 12px; color: var(--text-dim);
+    font-weight: 700; padding: 0 4px;
+  }
+  .ex2-td-kg, .ex2-td-reps{ padding: 2px 4px; }
+  .ex2-input{
+    width: 100%; background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 6px; color: var(--text); padding: 6px 8px; font-size: 13px;
+    font-family: inherit;
+  }
+  .ex2-input:focus{ outline: none; border-color: var(--cyan); }
+  .ex2-input::placeholder{ color: var(--line); }
+  .ex2-comentario{ margin-top: 6px; }
+  .ex2-textarea{
+    width: 100%; background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 7px; color: var(--text); padding: 8px 10px;
+    font-size: 13px; font-family: inherit; resize: vertical; min-height: 36px;
+  }
+  .ex2-textarea:focus{ outline: none; border-color: var(--cyan); }
+  .ex2-textarea::placeholder{ color: var(--text-faint); }
+  .header-actions{
+    display: flex; gap: 8px; padding: 0 0 12px 0; flex-wrap: wrap;
+  }
+  .hdr-btn{
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 7px 11px; border-radius: 7px;
+    border: 1px solid var(--line); background: var(--bg-elev);
+    color: var(--text-dim); font-family: var(--font-display);
+    font-size: 11px; letter-spacing: 0.03em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .hdr-btn:active{ opacity: 0.75; }
+  .hdr-btn.export{ border-color: var(--cyan); color: var(--cyan); }
+  .hdr-btn .arrow{ font-size: 13px; line-height: 1; }
+
+  /* COACH IMPORT BANNER (visible tras importar) */
+  .coach-banner{
+    margin: 0 16px 14px 16px; padding: 10px 12px; border-radius: var(--radius);
+    background: var(--lime-dim); border-left: 3px solid var(--lime);
+    display:flex; align-items:center; justify-content: space-between; gap: 8px;
+  }
+  .coach-banner .c-text{ font-size: 12px; color: var(--lime); line-height: 1.4; }
+  .coach-banner .c-text b{ display:block; font-size: 13px; margin-bottom: 1px; }
+  .coach-close-btn{
+    flex: 0 0 auto; background: none; border: 1px solid var(--lime); color: var(--lime);
+    border-radius: 6px; padding: 5px 9px; font-size: 11px; font-family: var(--font-display);
+    text-transform: uppercase;
+  }
+  .readonly-note{
+    margin: 0 16px 14px 16px; padding: 9px 12px; border-radius: var(--radius);
+    background: var(--bg-card); border: 1px solid var(--line-soft);
+    font-size: 12px; color: var(--text-faint); text-align:center;
+  }
+  .import-error{
+    margin: 0 16px 10px 16px; padding: 9px 12px; border-radius: var(--radius);
+    background: var(--bg-card); border: 1px solid var(--cyan);
+    font-size: 12px; color: #A9DBFF; text-align:center;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+
+<script id="program-data" type="application/json">[{"semana": 1, "bloque": "Bloque 1: Acumulación", "fase_bloque": "Adaptación anatómica y técnica — construyendo volumen tolerable", "sesiones": [{"dia": "Día 1", "titulo": "Full Body A — Sentadilla + Empuje/Tracción Horizontal", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Movilidad de cadera", "detalle": "Círculos de cadera + apertura/cierre controlado", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla con peso corporal", "detalle": "Activación general de tren inferior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Cat-cow", "detalle": "Movilidad de columna", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Goblet Squat (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Goblet Squat (DB)", "detalle": "Sentadilla frontal con mancuerna sostenida contra el pecho, torso erguido", "series": "4 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Floor Press", "detalle": "Press de pecho acostado en el piso; el piso limita el rango y protege el hombro", "series": "4 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Remo a dos manos (bent-over)", "detalle": "Espalda neutra, tirón hacia el abdomen, control en la bajada", "series": "4 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada reversa con DB", "detalle": "Paso atrás controlado, rodilla no toca el piso con fuerza", "series": "3 series x 10-12 c/pierna", "intensidad": "RIR 2", "descanso": "60 seg", "video": ""}, {"nombre": "Elevaciones laterales DB", "detalle": "Codos con leve flexión, subir hasta la altura del hombro", "series": "3 series x 12-15 reps", "intensidad": "RIR 2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Curl de bíceps DB", "detalle": "Codos pegados al torso, sin balanceo", "series": "3 series x 12-15 reps", "intensidad": "RIR 2", "descanso": "45-60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 sentadillas con salto (o sin salto), 10 mountain climbers, 8 flexiones de brazos, 20 seg de plancha", "series": "8 min", "intensidad": "RPE 7", "descanso": "-", "video": ""}]}], "notas": "Semana 1/8 — Bloque 1: Acumulación. Primera semana: prioridad absoluta a la técnica. Anotá el peso usado en cada serie para tener referencia la próxima semana."}, {"dia": "Día 2", "titulo": "Full Body B — Bisagra de Cadera + Empuje/Tracción Vertical", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Bird-dog", "detalle": "Activación de core y glúteo", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Puente de glúteo", "detalle": "Activación de cadena posterior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Hip hinge con mancuerna liviana", "detalle": "Patrón de bisagra de cadera, técnica antes que carga", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Peso Muerto Rumano con DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Peso Muerto Rumano DB (RDL)", "detalle": "Bisagra de cadera, rodilla con leve flexión fija, foco en isquios y glúteo", "series": "4 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Press Militar de pie DB", "detalle": "Core apretado, sin hiperextensión lumbar, sube en línea recta", "series": "4 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo unilateral DB", "detalle": "Apoyo en banco o rodilla, tirón limpio sin rotar el torso", "series": "4 series x 8-10 reps c/lado", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Hip Thrust DB", "detalle": "Apoyo de espalda alta en el piso, pausa 1 seg arriba, core apretado", "series": "3 series x 12-15 reps", "intensidad": "RIR 2", "descanso": "60 seg", "video": ""}, {"nombre": "Extensión de tríceps sobre la cabeza DB", "detalle": "A dos manos, codos fijos apuntando al techo", "series": "3 series x 12-15 reps", "intensidad": "RIR 2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Plancha frontal", "detalle": "Cadera alineada, sin hundir la zona lumbar", "series": "3 series x 30-45 seg", "intensidad": "-", "descanso": "45 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Salida en bicicleta", "detalle": "Recorrido al aire libre a ritmo conversable, sin buscar velocidad. Es un complemento aeróbico, no una sesión de calidad", "series": "20-30 min", "intensidad": "RPE 4-5", "descanso": "-", "video": ""}]}], "notas": "Semana 1/8 — Bloque 1: Acumulación. Primera semana: prioridad absoluta a la técnica. Anotá el peso usado en cada serie para tener referencia la próxima semana."}, {"dia": "Día 3", "titulo": "Full Body C — Unilateral + Metabólico", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Zancada caminando sin peso", "detalle": "Activación de piernas y equilibrio", "series": "1 serie x 10 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Rotación torácica", "detalle": "Movilidad de columna dorsal en cuadrupedia", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Escápulas activas", "detalle": "Remo isométrico para activar la espalda alta", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla frontal DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Sentadilla frontal DB (goblet, carga alta)", "detalle": "Torso lo más vertical posible, codos altos sosteniendo la carga", "series": "4 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo renegado DB", "detalle": "Posición de plancha alta, remo alternado sin rotar la cadera", "series": "4 series x 6-8 reps c/lado", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Push Press DB", "detalle": "Impulso leve de piernas para ayudar a subir la carga por encima de la cabeza", "series": "4 series x 6-8 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada caminando DB", "detalle": "Paso largo y estable, rodilla alineada con el pie", "series": "3 series x 10 c/pierna", "intensidad": "RIR 2", "descanso": "60 seg", "video": ""}, {"nombre": "Pullover DB (piso)", "detalle": "Acostado, brazos rectos, baja hasta sentir estiramiento en el dorsal", "series": "3 series x 12-15 reps", "intensidad": "RIR 2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Farmer's Carry DB", "detalle": "Postura erguida, core rígido, pasos cortos y controlados", "series": "3 series x 30-40 seg", "intensidad": "-", "descanso": "60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 burpees (o burpee sin salto/flexión), 15 jumping jacks, 20 seg de high knees, 10 sentadillas", "series": "8-10 min", "intensidad": "RPE 7-8", "descanso": "-", "video": ""}]}], "notas": "Semana 1/8 — Bloque 1: Acumulación. Primera semana: prioridad absoluta a la técnica. Anotá el peso usado en cada serie para tener referencia la próxima semana."}]}, {"semana": 2, "bloque": "Bloque 1: Acumulación", "fase_bloque": "Adaptación anatómica y técnica — construyendo volumen tolerable", "sesiones": [{"dia": "Día 1", "titulo": "Full Body A — Sentadilla + Empuje/Tracción Horizontal", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Movilidad de cadera", "detalle": "Círculos de cadera + apertura/cierre controlado", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla con peso corporal", "detalle": "Activación general de tren inferior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Cat-cow", "detalle": "Movilidad de columna", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Goblet Squat (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Goblet Squat (DB)", "detalle": "Sentadilla frontal con mancuerna sostenida contra el pecho, torso erguido", "series": "4 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Floor Press", "detalle": "Press de pecho acostado en el piso; el piso limita el rango y protege el hombro", "series": "4 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Remo a dos manos (bent-over)", "detalle": "Espalda neutra, tirón hacia el abdomen, control en la bajada", "series": "4 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada reversa con DB", "detalle": "Paso atrás controlado, rodilla no toca el piso con fuerza", "series": "3 series x 10-12 c/pierna", "intensidad": "RIR 2", "descanso": "60 seg", "video": ""}, {"nombre": "Elevaciones laterales DB", "detalle": "Codos con leve flexión, subir hasta la altura del hombro", "series": "3 series x 12-15 reps", "intensidad": "RIR 2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Curl de bíceps DB", "detalle": "Codos pegados al torso, sin balanceo", "series": "3 series x 12-15 reps", "intensidad": "RIR 2", "descanso": "45-60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 sentadillas con salto (o sin salto), 10 mountain climbers, 8 flexiones de brazos, 20 seg de plancha", "series": "8 min", "intensidad": "RPE 7", "descanso": "-", "video": ""}]}], "notas": "Semana 2/8 — Bloque 1: Acumulación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}, {"dia": "Día 2", "titulo": "Full Body B — Bisagra de Cadera + Empuje/Tracción Vertical", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Bird-dog", "detalle": "Activación de core y glúteo", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Puente de glúteo", "detalle": "Activación de cadena posterior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Hip hinge con mancuerna liviana", "detalle": "Patrón de bisagra de cadera, técnica antes que carga", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Peso Muerto Rumano con DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Peso Muerto Rumano DB (RDL)", "detalle": "Bisagra de cadera, rodilla con leve flexión fija, foco en isquios y glúteo", "series": "4 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Press Militar de pie DB", "detalle": "Core apretado, sin hiperextensión lumbar, sube en línea recta", "series": "4 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo unilateral DB", "detalle": "Apoyo en banco o rodilla, tirón limpio sin rotar el torso", "series": "4 series x 8-10 reps c/lado", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Hip Thrust DB", "detalle": "Apoyo de espalda alta en el piso, pausa 1 seg arriba, core apretado", "series": "3 series x 12-15 reps", "intensidad": "RIR 2", "descanso": "60 seg", "video": ""}, {"nombre": "Extensión de tríceps sobre la cabeza DB", "detalle": "A dos manos, codos fijos apuntando al techo", "series": "3 series x 12-15 reps", "intensidad": "RIR 2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Plancha frontal", "detalle": "Cadera alineada, sin hundir la zona lumbar", "series": "3 series x 30-45 seg", "intensidad": "-", "descanso": "45 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Salida en bicicleta", "detalle": "Recorrido al aire libre a ritmo conversable, sin buscar velocidad. Es un complemento aeróbico, no una sesión de calidad", "series": "20-30 min", "intensidad": "RPE 4-5", "descanso": "-", "video": ""}]}], "notas": "Semana 2/8 — Bloque 1: Acumulación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}, {"dia": "Día 3", "titulo": "Full Body C — Unilateral + Metabólico", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Zancada caminando sin peso", "detalle": "Activación de piernas y equilibrio", "series": "1 serie x 10 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Rotación torácica", "detalle": "Movilidad de columna dorsal en cuadrupedia", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Escápulas activas", "detalle": "Remo isométrico para activar la espalda alta", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla frontal DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Sentadilla frontal DB (goblet, carga alta)", "detalle": "Torso lo más vertical posible, codos altos sosteniendo la carga", "series": "4 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo renegado DB", "detalle": "Posición de plancha alta, remo alternado sin rotar la cadera", "series": "4 series x 6-8 reps c/lado", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Push Press DB", "detalle": "Impulso leve de piernas para ayudar a subir la carga por encima de la cabeza", "series": "4 series x 6-8 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada caminando DB", "detalle": "Paso largo y estable, rodilla alineada con el pie", "series": "3 series x 10 c/pierna", "intensidad": "RIR 2", "descanso": "60 seg", "video": ""}, {"nombre": "Pullover DB (piso)", "detalle": "Acostado, brazos rectos, baja hasta sentir estiramiento en el dorsal", "series": "3 series x 12-15 reps", "intensidad": "RIR 2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Farmer's Carry DB", "detalle": "Postura erguida, core rígido, pasos cortos y controlados", "series": "3 series x 30-40 seg", "intensidad": "-", "descanso": "60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 burpees (o burpee sin salto/flexión), 15 jumping jacks, 20 seg de high knees, 10 sentadillas", "series": "8-10 min", "intensidad": "RPE 7-8", "descanso": "-", "video": ""}]}], "notas": "Semana 2/8 — Bloque 1: Acumulación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}]}, {"semana": 3, "bloque": "Bloque 1: Acumulación", "fase_bloque": "Adaptación anatómica y técnica — construyendo volumen tolerable", "sesiones": [{"dia": "Día 1", "titulo": "Full Body A — Sentadilla + Empuje/Tracción Horizontal", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Movilidad de cadera", "detalle": "Círculos de cadera + apertura/cierre controlado", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla con peso corporal", "detalle": "Activación general de tren inferior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Cat-cow", "detalle": "Movilidad de columna", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Goblet Squat (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Goblet Squat (DB)", "detalle": "Sentadilla frontal con mancuerna sostenida contra el pecho, torso erguido", "series": "4 series x 8-10 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Floor Press", "detalle": "Press de pecho acostado en el piso; el piso limita el rango y protege el hombro", "series": "4 series x 8-10 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Remo a dos manos (bent-over)", "detalle": "Espalda neutra, tirón hacia el abdomen, control en la bajada", "series": "4 series x 8-10 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada reversa con DB", "detalle": "Paso atrás controlado, rodilla no toca el piso con fuerza", "series": "3 series x 10-12 c/pierna", "intensidad": "RIR 1-2", "descanso": "60 seg", "video": ""}, {"nombre": "Elevaciones laterales DB", "detalle": "Codos con leve flexión, subir hasta la altura del hombro", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Curl de bíceps DB", "detalle": "Codos pegados al torso, sin balanceo", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 sentadillas con salto (o sin salto), 10 mountain climbers, 8 flexiones de brazos, 20 seg de plancha", "series": "8 min", "intensidad": "RPE 7", "descanso": "-", "video": ""}]}], "notas": "Semana 3/8 — Bloque 1: Acumulación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}, {"dia": "Día 2", "titulo": "Full Body B — Bisagra de Cadera + Empuje/Tracción Vertical", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Bird-dog", "detalle": "Activación de core y glúteo", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Puente de glúteo", "detalle": "Activación de cadena posterior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Hip hinge con mancuerna liviana", "detalle": "Patrón de bisagra de cadera, técnica antes que carga", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Peso Muerto Rumano con DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Peso Muerto Rumano DB (RDL)", "detalle": "Bisagra de cadera, rodilla con leve flexión fija, foco en isquios y glúteo", "series": "4 series x 8-10 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Press Militar de pie DB", "detalle": "Core apretado, sin hiperextensión lumbar, sube en línea recta", "series": "4 series x 8-10 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo unilateral DB", "detalle": "Apoyo en banco o rodilla, tirón limpio sin rotar el torso", "series": "4 series x 8-10 reps c/lado", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Hip Thrust DB", "detalle": "Apoyo de espalda alta en el piso, pausa 1 seg arriba, core apretado", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "60 seg", "video": ""}, {"nombre": "Extensión de tríceps sobre la cabeza DB", "detalle": "A dos manos, codos fijos apuntando al techo", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Plancha frontal", "detalle": "Cadera alineada, sin hundir la zona lumbar", "series": "3 series x 30-45 seg", "intensidad": "-", "descanso": "45 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Salida en bicicleta", "detalle": "Recorrido al aire libre a ritmo conversable, sin buscar velocidad. Es un complemento aeróbico, no una sesión de calidad", "series": "20-30 min", "intensidad": "RPE 4-5", "descanso": "-", "video": ""}]}], "notas": "Semana 3/8 — Bloque 1: Acumulación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}, {"dia": "Día 3", "titulo": "Full Body C — Unilateral + Metabólico", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Zancada caminando sin peso", "detalle": "Activación de piernas y equilibrio", "series": "1 serie x 10 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Rotación torácica", "detalle": "Movilidad de columna dorsal en cuadrupedia", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Escápulas activas", "detalle": "Remo isométrico para activar la espalda alta", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla frontal DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Sentadilla frontal DB (goblet, carga alta)", "detalle": "Torso lo más vertical posible, codos altos sosteniendo la carga", "series": "4 series x 8-10 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo renegado DB", "detalle": "Posición de plancha alta, remo alternado sin rotar la cadera", "series": "4 series x 6-8 reps c/lado", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Push Press DB", "detalle": "Impulso leve de piernas para ayudar a subir la carga por encima de la cabeza", "series": "4 series x 6-8 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada caminando DB", "detalle": "Paso largo y estable, rodilla alineada con el pie", "series": "3 series x 10 c/pierna", "intensidad": "RIR 1-2", "descanso": "60 seg", "video": ""}, {"nombre": "Pullover DB (piso)", "detalle": "Acostado, brazos rectos, baja hasta sentir estiramiento en el dorsal", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Farmer's Carry DB", "detalle": "Postura erguida, core rígido, pasos cortos y controlados", "series": "3 series x 30-40 seg", "intensidad": "-", "descanso": "60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 burpees (o burpee sin salto/flexión), 15 jumping jacks, 20 seg de high knees, 10 sentadillas", "series": "8-10 min", "intensidad": "RPE 7-8", "descanso": "-", "video": ""}]}], "notas": "Semana 3/8 — Bloque 1: Acumulación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}]}, {"semana": 4, "bloque": "Bloque 1: Acumulación", "fase_bloque": "Adaptación anatómica y técnica — construyendo volumen tolerable", "sesiones": [{"dia": "Día 1", "titulo": "Full Body A — Sentadilla + Empuje/Tracción Horizontal", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Movilidad de cadera", "detalle": "Círculos de cadera + apertura/cierre controlado", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla con peso corporal", "detalle": "Activación general de tren inferior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Cat-cow", "detalle": "Movilidad de columna", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Goblet Squat (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Goblet Squat (DB)", "detalle": "Sentadilla frontal con mancuerna sostenida contra el pecho, torso erguido", "series": "4 series x 8-10 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Floor Press", "detalle": "Press de pecho acostado en el piso; el piso limita el rango y protege el hombro", "series": "4 series x 8-10 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Remo a dos manos (bent-over)", "detalle": "Espalda neutra, tirón hacia el abdomen, control en la bajada", "series": "4 series x 8-10 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada reversa con DB", "detalle": "Paso atrás controlado, rodilla no toca el piso con fuerza", "series": "3 series x 10-12 c/pierna", "intensidad": "RIR 1-2", "descanso": "60 seg", "video": ""}, {"nombre": "Elevaciones laterales DB", "detalle": "Codos con leve flexión, subir hasta la altura del hombro", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Curl de bíceps DB", "detalle": "Codos pegados al torso, sin balanceo", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 sentadillas con salto (o sin salto), 10 mountain climbers, 8 flexiones de brazos, 20 seg de plancha", "series": "8 min", "intensidad": "RPE 7", "descanso": "-", "video": ""}]}], "notas": "Semana 4/8 — Bloque 1: Acumulación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}, {"dia": "Día 2", "titulo": "Full Body B — Bisagra de Cadera + Empuje/Tracción Vertical", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Bird-dog", "detalle": "Activación de core y glúteo", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Puente de glúteo", "detalle": "Activación de cadena posterior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Hip hinge con mancuerna liviana", "detalle": "Patrón de bisagra de cadera, técnica antes que carga", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Peso Muerto Rumano con DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Peso Muerto Rumano DB (RDL)", "detalle": "Bisagra de cadera, rodilla con leve flexión fija, foco en isquios y glúteo", "series": "4 series x 8-10 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Press Militar de pie DB", "detalle": "Core apretado, sin hiperextensión lumbar, sube en línea recta", "series": "4 series x 8-10 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo unilateral DB", "detalle": "Apoyo en banco o rodilla, tirón limpio sin rotar el torso", "series": "4 series x 8-10 reps c/lado", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Hip Thrust DB", "detalle": "Apoyo de espalda alta en el piso, pausa 1 seg arriba, core apretado", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "60 seg", "video": ""}, {"nombre": "Extensión de tríceps sobre la cabeza DB", "detalle": "A dos manos, codos fijos apuntando al techo", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Plancha frontal", "detalle": "Cadera alineada, sin hundir la zona lumbar", "series": "3 series x 30-45 seg", "intensidad": "-", "descanso": "45 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Salida en bicicleta", "detalle": "Recorrido al aire libre a ritmo conversable, sin buscar velocidad. Es un complemento aeróbico, no una sesión de calidad", "series": "20-30 min", "intensidad": "RPE 4-5", "descanso": "-", "video": ""}]}], "notas": "Semana 4/8 — Bloque 1: Acumulación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}, {"dia": "Día 3", "titulo": "Full Body C — Unilateral + Metabólico", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Zancada caminando sin peso", "detalle": "Activación de piernas y equilibrio", "series": "1 serie x 10 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Rotación torácica", "detalle": "Movilidad de columna dorsal en cuadrupedia", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Escápulas activas", "detalle": "Remo isométrico para activar la espalda alta", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla frontal DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Sentadilla frontal DB (goblet, carga alta)", "detalle": "Torso lo más vertical posible, codos altos sosteniendo la carga", "series": "4 series x 8-10 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo renegado DB", "detalle": "Posición de plancha alta, remo alternado sin rotar la cadera", "series": "4 series x 6-8 reps c/lado", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Push Press DB", "detalle": "Impulso leve de piernas para ayudar a subir la carga por encima de la cabeza", "series": "4 series x 6-8 reps", "intensidad": "RIR 2-3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada caminando DB", "detalle": "Paso largo y estable, rodilla alineada con el pie", "series": "3 series x 10 c/pierna", "intensidad": "RIR 1-2", "descanso": "60 seg", "video": ""}, {"nombre": "Pullover DB (piso)", "detalle": "Acostado, brazos rectos, baja hasta sentir estiramiento en el dorsal", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Farmer's Carry DB", "detalle": "Postura erguida, core rígido, pasos cortos y controlados", "series": "3 series x 30-40 seg", "intensidad": "-", "descanso": "60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 burpees (o burpee sin salto/flexión), 15 jumping jacks, 20 seg de high knees, 10 sentadillas", "series": "8-10 min", "intensidad": "RPE 7-8", "descanso": "-", "video": ""}]}], "notas": "Semana 4/8 — Bloque 1: Acumulación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}]}, {"semana": 5, "bloque": "Bloque 2: Intensificación", "fase_bloque": "Mayor densidad y carga, acercamiento al fallo técnico", "sesiones": [{"dia": "Día 1", "titulo": "Full Body A — Sentadilla + Empuje/Tracción Horizontal", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Movilidad de cadera", "detalle": "Círculos de cadera + apertura/cierre controlado", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla con peso corporal", "detalle": "Activación general de tren inferior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Cat-cow", "detalle": "Movilidad de columna", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Goblet Squat (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Goblet Squat (DB)", "detalle": "Sentadilla frontal con mancuerna sostenida contra el pecho, torso erguido", "series": "5 series x 8-10 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Floor Press", "detalle": "Press de pecho acostado en el piso; el piso limita el rango y protege el hombro", "series": "5 series x 8-10 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Remo a dos manos (bent-over)", "detalle": "Espalda neutra, tirón hacia el abdomen, control en la bajada", "series": "5 series x 8-10 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada reversa con DB", "detalle": "Paso atrás controlado, rodilla no toca el piso con fuerza", "series": "3 series x 10-12 c/pierna", "intensidad": "RIR 1-2", "descanso": "60 seg", "video": ""}, {"nombre": "Elevaciones laterales DB", "detalle": "Codos con leve flexión, subir hasta la altura del hombro", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Curl de bíceps DB", "detalle": "Codos pegados al torso, sin balanceo", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 sentadillas con salto (o sin salto), 10 mountain climbers, 8 flexiones de brazos, 20 seg de plancha", "series": "8 min", "intensidad": "RPE 7", "descanso": "-", "video": ""}]}], "notas": "Semana 5/8 — Bloque 2: Intensificación. Arranca el bloque de intensificación: mismo peso que la semana pasada pero un RIR más exigente. Si te queda cómodo, la próxima semana subimos carga."}, {"dia": "Día 2", "titulo": "Full Body B — Bisagra de Cadera + Empuje/Tracción Vertical", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Bird-dog", "detalle": "Activación de core y glúteo", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Puente de glúteo", "detalle": "Activación de cadena posterior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Hip hinge con mancuerna liviana", "detalle": "Patrón de bisagra de cadera, técnica antes que carga", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Peso Muerto Rumano con DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Peso Muerto Rumano DB (RDL)", "detalle": "Bisagra de cadera, rodilla con leve flexión fija, foco en isquios y glúteo", "series": "5 series x 8-10 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}, {"nombre": "Press Militar de pie DB", "detalle": "Core apretado, sin hiperextensión lumbar, sube en línea recta", "series": "5 series x 8-10 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo unilateral DB", "detalle": "Apoyo en banco o rodilla, tirón limpio sin rotar el torso", "series": "5 series x 8-10 reps c/lado", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Hip Thrust DB", "detalle": "Apoyo de espalda alta en el piso, pausa 1 seg arriba, core apretado", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "60 seg", "video": ""}, {"nombre": "Extensión de tríceps sobre la cabeza DB", "detalle": "A dos manos, codos fijos apuntando al techo", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Plancha frontal", "detalle": "Cadera alineada, sin hundir la zona lumbar", "series": "3 series x 30-45 seg", "intensidad": "-", "descanso": "45 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Salida en bicicleta", "detalle": "Recorrido al aire libre a ritmo conversable, sin buscar velocidad. Es un complemento aeróbico, no una sesión de calidad", "series": "20-30 min", "intensidad": "RPE 4-5", "descanso": "-", "video": ""}]}], "notas": "Semana 5/8 — Bloque 2: Intensificación. Arranca el bloque de intensificación: mismo peso que la semana pasada pero un RIR más exigente. Si te queda cómodo, la próxima semana subimos carga."}, {"dia": "Día 3", "titulo": "Full Body C — Unilateral + Metabólico", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Zancada caminando sin peso", "detalle": "Activación de piernas y equilibrio", "series": "1 serie x 10 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Rotación torácica", "detalle": "Movilidad de columna dorsal en cuadrupedia", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Escápulas activas", "detalle": "Remo isométrico para activar la espalda alta", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla frontal DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Sentadilla frontal DB (goblet, carga alta)", "detalle": "Torso lo más vertical posible, codos altos sosteniendo la carga", "series": "5 series x 8-10 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo renegado DB", "detalle": "Posición de plancha alta, remo alternado sin rotar la cadera", "series": "5 series x 6-8 reps c/lado", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}, {"nombre": "Push Press DB", "detalle": "Impulso leve de piernas para ayudar a subir la carga por encima de la cabeza", "series": "5 series x 6-8 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada caminando DB", "detalle": "Paso largo y estable, rodilla alineada con el pie", "series": "3 series x 10 c/pierna", "intensidad": "RIR 1-2", "descanso": "60 seg", "video": ""}, {"nombre": "Pullover DB (piso)", "detalle": "Acostado, brazos rectos, baja hasta sentir estiramiento en el dorsal", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Farmer's Carry DB", "detalle": "Postura erguida, core rígido, pasos cortos y controlados", "series": "3 series x 30-40 seg", "intensidad": "-", "descanso": "60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 burpees (o burpee sin salto/flexión), 15 jumping jacks, 20 seg de high knees, 10 sentadillas", "series": "8-10 min", "intensidad": "RPE 7-8", "descanso": "-", "video": ""}]}], "notas": "Semana 5/8 — Bloque 2: Intensificación. Arranca el bloque de intensificación: mismo peso que la semana pasada pero un RIR más exigente. Si te queda cómodo, la próxima semana subimos carga."}]}, {"semana": 6, "bloque": "Bloque 2: Intensificación", "fase_bloque": "Mayor densidad y carga, acercamiento al fallo técnico", "sesiones": [{"dia": "Día 1", "titulo": "Full Body A — Sentadilla + Empuje/Tracción Horizontal", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Movilidad de cadera", "detalle": "Círculos de cadera + apertura/cierre controlado", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla con peso corporal", "detalle": "Activación general de tren inferior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Cat-cow", "detalle": "Movilidad de columna", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Goblet Squat (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Goblet Squat (DB)", "detalle": "Sentadilla frontal con mancuerna sostenida contra el pecho, torso erguido", "series": "5 series x 8-10 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Floor Press", "detalle": "Press de pecho acostado en el piso; el piso limita el rango y protege el hombro", "series": "5 series x 8-10 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Remo a dos manos (bent-over)", "detalle": "Espalda neutra, tirón hacia el abdomen, control en la bajada", "series": "5 series x 8-10 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada reversa con DB", "detalle": "Paso atrás controlado, rodilla no toca el piso con fuerza", "series": "3 series x 10-12 c/pierna", "intensidad": "RIR 1-2", "descanso": "60 seg", "video": ""}, {"nombre": "Elevaciones laterales DB", "detalle": "Codos con leve flexión, subir hasta la altura del hombro", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Curl de bíceps DB", "detalle": "Codos pegados al torso, sin balanceo", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 sentadillas con salto (o sin salto), 10 mountain climbers, 8 flexiones de brazos, 20 seg de plancha", "series": "8 min", "intensidad": "RPE 7", "descanso": "-", "video": ""}]}], "notas": "Semana 6/8 — Bloque 2: Intensificación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}, {"dia": "Día 2", "titulo": "Full Body B — Bisagra de Cadera + Empuje/Tracción Vertical", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Bird-dog", "detalle": "Activación de core y glúteo", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Puente de glúteo", "detalle": "Activación de cadena posterior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Hip hinge con mancuerna liviana", "detalle": "Patrón de bisagra de cadera, técnica antes que carga", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Peso Muerto Rumano con DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Peso Muerto Rumano DB (RDL)", "detalle": "Bisagra de cadera, rodilla con leve flexión fija, foco en isquios y glúteo", "series": "5 series x 8-10 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}, {"nombre": "Press Militar de pie DB", "detalle": "Core apretado, sin hiperextensión lumbar, sube en línea recta", "series": "5 series x 8-10 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo unilateral DB", "detalle": "Apoyo en banco o rodilla, tirón limpio sin rotar el torso", "series": "5 series x 8-10 reps c/lado", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Hip Thrust DB", "detalle": "Apoyo de espalda alta en el piso, pausa 1 seg arriba, core apretado", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "60 seg", "video": ""}, {"nombre": "Extensión de tríceps sobre la cabeza DB", "detalle": "A dos manos, codos fijos apuntando al techo", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Plancha frontal", "detalle": "Cadera alineada, sin hundir la zona lumbar", "series": "3 series x 30-45 seg", "intensidad": "-", "descanso": "45 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Salida en bicicleta", "detalle": "Recorrido al aire libre a ritmo conversable, sin buscar velocidad. Es un complemento aeróbico, no una sesión de calidad", "series": "20-30 min", "intensidad": "RPE 4-5", "descanso": "-", "video": ""}]}], "notas": "Semana 6/8 — Bloque 2: Intensificación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}, {"dia": "Día 3", "titulo": "Full Body C — Unilateral + Metabólico", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Zancada caminando sin peso", "detalle": "Activación de piernas y equilibrio", "series": "1 serie x 10 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Rotación torácica", "detalle": "Movilidad de columna dorsal en cuadrupedia", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Escápulas activas", "detalle": "Remo isométrico para activar la espalda alta", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla frontal DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Sentadilla frontal DB (goblet, carga alta)", "detalle": "Torso lo más vertical posible, codos altos sosteniendo la carga", "series": "5 series x 8-10 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo renegado DB", "detalle": "Posición de plancha alta, remo alternado sin rotar la cadera", "series": "5 series x 6-8 reps c/lado", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}, {"nombre": "Push Press DB", "detalle": "Impulso leve de piernas para ayudar a subir la carga por encima de la cabeza", "series": "5 series x 6-8 reps", "intensidad": "RIR 2", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada caminando DB", "detalle": "Paso largo y estable, rodilla alineada con el pie", "series": "3 series x 10 c/pierna", "intensidad": "RIR 1-2", "descanso": "60 seg", "video": ""}, {"nombre": "Pullover DB (piso)", "detalle": "Acostado, brazos rectos, baja hasta sentir estiramiento en el dorsal", "series": "3 series x 12-15 reps", "intensidad": "RIR 1-2", "descanso": "45-60 seg", "video": ""}, {"nombre": "Farmer's Carry DB", "detalle": "Postura erguida, core rígido, pasos cortos y controlados", "series": "3 series x 30-40 seg", "intensidad": "-", "descanso": "60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 burpees (o burpee sin salto/flexión), 15 jumping jacks, 20 seg de high knees, 10 sentadillas", "series": "8-10 min", "intensidad": "RPE 7-8", "descanso": "-", "video": ""}]}], "notas": "Semana 6/8 — Bloque 2: Intensificación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}]}, {"semana": 7, "bloque": "Bloque 2: Intensificación", "fase_bloque": "Mayor densidad y carga, acercamiento al fallo técnico", "sesiones": [{"dia": "Día 1", "titulo": "Full Body A — Sentadilla + Empuje/Tracción Horizontal", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Movilidad de cadera", "detalle": "Círculos de cadera + apertura/cierre controlado", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla con peso corporal", "detalle": "Activación general de tren inferior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Cat-cow", "detalle": "Movilidad de columna", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Goblet Squat (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Goblet Squat (DB)", "detalle": "Sentadilla frontal con mancuerna sostenida contra el pecho, torso erguido", "series": "5 series x 8-10 reps", "intensidad": "RIR 1-2", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Floor Press", "detalle": "Press de pecho acostado en el piso; el piso limita el rango y protege el hombro", "series": "5 series x 8-10 reps", "intensidad": "RIR 1-2", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Remo a dos manos (bent-over)", "detalle": "Espalda neutra, tirón hacia el abdomen, control en la bajada", "series": "5 series x 8-10 reps", "intensidad": "RIR 1-2", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada reversa con DB", "detalle": "Paso atrás controlado, rodilla no toca el piso con fuerza", "series": "3 series x 10-12 c/pierna", "intensidad": "RIR 1", "descanso": "60 seg", "video": ""}, {"nombre": "Elevaciones laterales DB", "detalle": "Codos con leve flexión, subir hasta la altura del hombro", "series": "3 series x 12-15 reps", "intensidad": "RIR 1", "descanso": "45-60 seg", "video": ""}, {"nombre": "Curl de bíceps DB", "detalle": "Codos pegados al torso, sin balanceo", "series": "3 series x 12-15 reps", "intensidad": "RIR 1", "descanso": "45-60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 sentadillas con salto (o sin salto), 10 mountain climbers, 8 flexiones de brazos, 20 seg de plancha", "series": "8 min", "intensidad": "RPE 7", "descanso": "-", "video": ""}]}], "notas": "Semana 7/8 — Bloque 2: Intensificación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}, {"dia": "Día 2", "titulo": "Full Body B — Bisagra de Cadera + Empuje/Tracción Vertical", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Bird-dog", "detalle": "Activación de core y glúteo", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Puente de glúteo", "detalle": "Activación de cadena posterior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Hip hinge con mancuerna liviana", "detalle": "Patrón de bisagra de cadera, técnica antes que carga", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Peso Muerto Rumano con DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Peso Muerto Rumano DB (RDL)", "detalle": "Bisagra de cadera, rodilla con leve flexión fija, foco en isquios y glúteo", "series": "5 series x 8-10 reps", "intensidad": "RIR 1-2", "descanso": "90-120 seg", "video": ""}, {"nombre": "Press Militar de pie DB", "detalle": "Core apretado, sin hiperextensión lumbar, sube en línea recta", "series": "5 series x 8-10 reps", "intensidad": "RIR 1-2", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo unilateral DB", "detalle": "Apoyo en banco o rodilla, tirón limpio sin rotar el torso", "series": "5 series x 8-10 reps c/lado", "intensidad": "RIR 1-2", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Hip Thrust DB", "detalle": "Apoyo de espalda alta en el piso, pausa 1 seg arriba, core apretado", "series": "3 series x 12-15 reps", "intensidad": "RIR 1", "descanso": "60 seg", "video": ""}, {"nombre": "Extensión de tríceps sobre la cabeza DB", "detalle": "A dos manos, codos fijos apuntando al techo", "series": "3 series x 12-15 reps", "intensidad": "RIR 1", "descanso": "45-60 seg", "video": ""}, {"nombre": "Plancha frontal", "detalle": "Cadera alineada, sin hundir la zona lumbar", "series": "3 series x 30-45 seg", "intensidad": "-", "descanso": "45 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Salida en bicicleta", "detalle": "Recorrido al aire libre a ritmo conversable, sin buscar velocidad. Es un complemento aeróbico, no una sesión de calidad", "series": "20-30 min", "intensidad": "RPE 4-5", "descanso": "-", "video": ""}]}], "notas": "Semana 7/8 — Bloque 2: Intensificación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}, {"dia": "Día 3", "titulo": "Full Body C — Unilateral + Metabólico", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Zancada caminando sin peso", "detalle": "Activación de piernas y equilibrio", "series": "1 serie x 10 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Rotación torácica", "detalle": "Movilidad de columna dorsal en cuadrupedia", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Escápulas activas", "detalle": "Remo isométrico para activar la espalda alta", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla frontal DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Sentadilla frontal DB (goblet, carga alta)", "detalle": "Torso lo más vertical posible, codos altos sosteniendo la carga", "series": "5 series x 8-10 reps", "intensidad": "RIR 1-2", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo renegado DB", "detalle": "Posición de plancha alta, remo alternado sin rotar la cadera", "series": "5 series x 6-8 reps c/lado", "intensidad": "RIR 1-2", "descanso": "90-120 seg", "video": ""}, {"nombre": "Push Press DB", "detalle": "Impulso leve de piernas para ayudar a subir la carga por encima de la cabeza", "series": "5 series x 6-8 reps", "intensidad": "RIR 1-2", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada caminando DB", "detalle": "Paso largo y estable, rodilla alineada con el pie", "series": "3 series x 10 c/pierna", "intensidad": "RIR 1", "descanso": "60 seg", "video": ""}, {"nombre": "Pullover DB (piso)", "detalle": "Acostado, brazos rectos, baja hasta sentir estiramiento en el dorsal", "series": "3 series x 12-15 reps", "intensidad": "RIR 1", "descanso": "45-60 seg", "video": ""}, {"nombre": "Farmer's Carry DB", "detalle": "Postura erguida, core rígido, pasos cortos y controlados", "series": "3 series x 30-40 seg", "intensidad": "-", "descanso": "60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 burpees (o burpee sin salto/flexión), 15 jumping jacks, 20 seg de high knees, 10 sentadillas", "series": "8-10 min", "intensidad": "RPE 7-8", "descanso": "-", "video": ""}]}], "notas": "Semana 7/8 — Bloque 2: Intensificación. Aplicá la doble progresión: si llegaste al techo del rango de reps en todas las series con el RIR pedido, subí un escalón de peso (2,5 kg) la próxima sesión."}]}, {"semana": 8, "bloque": "Bloque 3: Descarga", "fase_bloque": "Reducción de volumen (~40%), misma intensidad relativa — supercompensación", "sesiones": [{"dia": "Día 1", "titulo": "Full Body A — Sentadilla + Empuje/Tracción Horizontal", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Movilidad de cadera", "detalle": "Círculos de cadera + apertura/cierre controlado", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla con peso corporal", "detalle": "Activación general de tren inferior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Cat-cow", "detalle": "Movilidad de columna", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Goblet Squat (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Goblet Squat (DB)", "detalle": "Sentadilla frontal con mancuerna sostenida contra el pecho, torso erguido", "series": "3 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Floor Press", "detalle": "Press de pecho acostado en el piso; el piso limita el rango y protege el hombro", "series": "3 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "DB Remo a dos manos (bent-over)", "detalle": "Espalda neutra, tirón hacia el abdomen, control en la bajada", "series": "3 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada reversa con DB", "detalle": "Paso atrás controlado, rodilla no toca el piso con fuerza", "series": "3 series x 10-12 c/pierna", "intensidad": "RIR 2-3", "descanso": "60 seg", "video": ""}, {"nombre": "Elevaciones laterales DB", "detalle": "Codos con leve flexión, subir hasta la altura del hombro", "series": "3 series x 12-15 reps", "intensidad": "RIR 2-3", "descanso": "45-60 seg", "video": ""}, {"nombre": "Curl de bíceps DB", "detalle": "Codos pegados al torso, sin balanceo", "series": "3 series x 12-15 reps", "intensidad": "RIR 2-3", "descanso": "45-60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 sentadillas con salto (o sin salto), 10 mountain climbers, 8 flexiones de brazos, 20 seg de plancha", "series": "8 min", "intensidad": "RPE 7", "descanso": "-", "video": ""}]}], "notas": "Semana 8/8 — Bloque 3: Descarga. Semana de descarga: bajamos volumen a propósito. Si te sentís con energía de más, no agregues series — la idea es llegar fresco para el próximo bloque."}, {"dia": "Día 2", "titulo": "Full Body B — Bisagra de Cadera + Empuje/Tracción Vertical", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Bird-dog", "detalle": "Activación de core y glúteo", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Puente de glúteo", "detalle": "Activación de cadena posterior", "series": "1 serie x 15", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Hip hinge con mancuerna liviana", "detalle": "Patrón de bisagra de cadera, técnica antes que carga", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Movilidad de hombro", "detalle": "Círculos de hombro + rotación externa con mancuerna liviana", "series": "2 series x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Peso Muerto Rumano con DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Peso Muerto Rumano DB (RDL)", "detalle": "Bisagra de cadera, rodilla con leve flexión fija, foco en isquios y glúteo", "series": "3 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Press Militar de pie DB", "detalle": "Core apretado, sin hiperextensión lumbar, sube en línea recta", "series": "3 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo unilateral DB", "detalle": "Apoyo en banco o rodilla, tirón limpio sin rotar el torso", "series": "3 series x 8-10 reps c/lado", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Hip Thrust DB", "detalle": "Apoyo de espalda alta en el piso, pausa 1 seg arriba, core apretado", "series": "3 series x 12-15 reps", "intensidad": "RIR 2-3", "descanso": "60 seg", "video": ""}, {"nombre": "Extensión de tríceps sobre la cabeza DB", "detalle": "A dos manos, codos fijos apuntando al techo", "series": "3 series x 12-15 reps", "intensidad": "RIR 2-3", "descanso": "45-60 seg", "video": ""}, {"nombre": "Plancha frontal", "detalle": "Cadera alineada, sin hundir la zona lumbar", "series": "3 series x 30-45 seg", "intensidad": "-", "descanso": "45 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Salida en bicicleta", "detalle": "Recorrido al aire libre a ritmo conversable, sin buscar velocidad. Es un complemento aeróbico, no una sesión de calidad", "series": "20-30 min", "intensidad": "RPE 4-5", "descanso": "-", "video": ""}]}], "notas": "Semana 8/8 — Bloque 3: Descarga. Semana de descarga: bajamos volumen a propósito. Si te sentís con energía de más, no agregues series — la idea es llegar fresco para el próximo bloque."}, {"dia": "Día 3", "titulo": "Full Body C — Unilateral + Metabólico", "tipo": "Fuerza", "fases": [{"fase": "Fase A — Calentamiento y Movilidad", "ejercicios": [{"nombre": "Zancada caminando sin peso", "detalle": "Activación de piernas y equilibrio", "series": "1 serie x 10 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Rotación torácica", "detalle": "Movilidad de columna dorsal en cuadrupedia", "series": "2 series x 8 c/lado", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Escápulas activas", "detalle": "Remo isométrico para activar la espalda alta", "series": "1 serie x 10", "intensidad": "Controlado", "descanso": "-", "video": ""}, {"nombre": "Sentadilla frontal DB (serie de aproximación)", "detalle": "Con carga liviana, foco en técnica y activación", "series": "1 serie x 10", "intensidad": "RIR 4", "descanso": "-", "video": ""}]}, {"fase": "Fase B — Bloque Principal", "ejercicios": [{"nombre": "Sentadilla frontal DB (goblet, carga alta)", "detalle": "Torso lo más vertical posible, codos altos sosteniendo la carga", "series": "3 series x 8-10 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Remo renegado DB", "detalle": "Posición de plancha alta, remo alternado sin rotar la cadera", "series": "3 series x 6-8 reps c/lado", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}, {"nombre": "Push Press DB", "detalle": "Impulso leve de piernas para ayudar a subir la carga por encima de la cabeza", "series": "3 series x 6-8 reps", "intensidad": "RIR 3", "descanso": "90-120 seg", "video": ""}]}, {"fase": "Fase C — Bloque Accesorio", "ejercicios": [{"nombre": "Zancada caminando DB", "detalle": "Paso largo y estable, rodilla alineada con el pie", "series": "3 series x 10 c/pierna", "intensidad": "RIR 2-3", "descanso": "60 seg", "video": ""}, {"nombre": "Pullover DB (piso)", "detalle": "Acostado, brazos rectos, baja hasta sentir estiramiento en el dorsal", "series": "3 series x 12-15 reps", "intensidad": "RIR 2-3", "descanso": "45-60 seg", "video": ""}, {"nombre": "Farmer's Carry DB", "detalle": "Postura erguida, core rígido, pasos cortos y controlados", "series": "3 series x 30-40 seg", "intensidad": "-", "descanso": "60 seg", "video": ""}]}, {"fase": "Fase D — Cardio Opcional", "ejercicios": [{"nombre": "Circuito sin material", "detalle": "4 rondas: 10 burpees (o burpee sin salto/flexión), 15 jumping jacks, 20 seg de high knees, 10 sentadillas", "series": "8-10 min", "intensidad": "RPE 7-8", "descanso": "-", "video": ""}]}], "notas": "Semana 8/8 — Bloque 3: Descarga. Semana de descarga: bajamos volumen a propósito. Si te sentís con energía de más, no agregues series — la idea es llegar fresco para el próximo bloque."}]}]</script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useCallback, useRef } = React;
+
+const PROGRAMA = JSON.parse(document.getElementById('program-data').textContent);
+const programa = PROGRAMA;
+const STORAGE_KEY = "maxi_tracking_v1";
+const GH_USER = "martinmamchur";
+const GH_REPO = "PlanOnline-Maxi";
+const GH_PROGRESS_FILE = "progreso.json";
+
+function loadTracking(){ try{ const r=localStorage.getItem(STORAGE_KEY); return r?JSON.parse(r):{}; }catch(e){ return {}; } }
+function saveTracking(data){ try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(data)); }catch(e){} }
+
+function getToken(){ return localStorage.getItem("gh_token_maxi")||""; }
+function setToken(t){ localStorage.setItem("gh_token_maxi",t); }
+
+async function ghLoadProgress(){
+  try{
+    const url=`https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/main/${GH_PROGRESS_FILE}?t=${Date.now()}`;
+    const res=await fetch(url);
+    if(!res.ok) return null;
+    return await res.json();
+  }catch(e){ return null; }
+}
+
+async function ghSaveProgress(data){
+  const token=getToken();
+  if(!token) return false;
+  try{
+    const apiUrl=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${GH_PROGRESS_FILE}`;
+    const headers={"Authorization":`token ${token}`,"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"};
+    let sha=null;
+    try{ const r=await fetch(apiUrl,{headers}); if(r.ok){const d=await r.json(); sha=d.sha;} }catch(e){}
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2))));
+    const body={message:`Progreso Maxi — ${new Date().toLocaleString()}`,content,...(sha?{sha}:{})};
+    const r=await fetch(apiUrl,{method:"PUT",headers,body:JSON.stringify(body)});
+    return r.ok;
+  }catch(e){ return false; }
+}
+function downloadJSON(filename,obj){
+  const blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob); const a=document.createElement("a");
+  a.href=url; a.download=filename; document.body.appendChild(a);
+  a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function exKey(s,d,f,e){ return `s${s}_d${d}_f${f}_e${e}`; }
+function dayKey(s,d){ return `s${s}_d${d}_done`; }
+function typeClass(t){ return "type-"+t.replace("/","\\/"); }
+
+/* ── DETECCIÓN DE TIPO DE EJERCICIO ──────────────────────────────── */
+
+const CARDIO_NAMES = /\bcarrera\b|running|assault bike|remo continuo|carrera continua|skierg continuo|ski erg continuo|trote|caminata|bici|cardio suave|skipping|strides|calentamiento de carrera/i;
+const MOBILITY_NAMES = /movilidad|estiramiento|foam roller|liberación miofascial|activación|activacion|dead bug|bird dog|puente de glúteo|clamshell|wall slide|rotacion|cat-cow|world.s greatest|pallof|equilibrio unipodal|balanceo unipodal|propiocepción|propriocepcion|excéntrico|excentrico|eversión|eversion|elevación de gemelo/i;
+const FASE_A_D = /Fase A|Fase D/i;
+const FASE_B   = /Fase B/i;
+
+function isCardioOrMobility(ejercicio, faseNombre){
+  // Fase B es SIEMPRE fuerza — tabla de series obligatoria sin excepción
+  if(FASE_B.test(faseNombre)) return false;
+  // Fases A y D son SIEMPRE movilidad/activación — sin tabla de series
+  if(FASE_A_D.test(faseNombre)) return true;
+  const n = (ejercicio.nombre||"") + " " + (ejercicio.detalle||"");
+  // Cardio continuo por nombre
+  if(CARDIO_NAMES.test(n)) return true;
+  // Movilidad/prevención por nombre
+  if(MOBILITY_NAMES.test(n)) return true;
+  // Si el campo series es solo tiempo o distancia pura (sin "N series x"), es cardio/tiempo
+  const s = (ejercicio.series||"").trim();
+  if(s && !s.match(/^(\d+)\s*(series|rondas)/i) && s.match(/^\d+\s*(min|seg|km| m\b)/i)) return true;
+  return false;
+}
+
+/* ── CR DETECTION ───────────────────────────────────────────────── */
+const CR_FUERZA   = /sled push|sled pull|\blunges\b|wall balls|burpee|farmers carry/i;
+const CR_LOCOMOTOR = /\bcarrera\b|running/i;
+
+function isRealCR(fase){
+  if(!/Fase C/i.test(fase.fase)) return false;
+  if(fase.ejercicios.length < 2) return false;
+  const nombres = fase.ejercicios.map(ej=>(ej.nombre||"")+" "+(ej.detalle||""));
+  const tieneCarrera = nombres.some(n=>CR_LOCOMOTOR.test(n));
+  const tieneFuerza  = nombres.some(n=>CR_FUERZA.test(n));
+  const tieneCardioMaquina = nombres.some(n=>/skierg|ski erg|\bremo\b/i.test(n));
+  return (tieneCarrera && tieneFuerza) || (tieneCardioMaquina && tieneFuerza);
+}
+
+/* ── HELPERS ─────────────────────────────────────────────────────── */
+function intensityClass(str){
+  if(!str) return "cr-meta-qty";
+  if(/Z2/i.test(str)) return "cr-meta-z2";
+  if(/Z3|Z4/i.test(str)) return "cr-meta-rpe";
+  if(/RPE/i.test(str)) return "cr-meta-rpe";
+  return "cr-meta-qty";
+}
+function crBlockTitle(n){ return n.replace(/^Fase C\s*[-–—]\s*/i,"").trim()||"Compromised Running"; }
+function estimateCRTime(n){ if(n<=2) return "8-12 min"; if(n<=4) return "12-20 min"; return "20-30 min"; }
+
+function parseSeries(s){
+  if(!s) return 1;
+  const m=s.match(/^(\d+)\s*(series|rondas)/i);
+  if(m) return Math.min(parseInt(m[1]),8);
+  return 1;
+}
+function parseRondas(ejercicios){
+  for(const ej of ejercicios){
+    const s=(ej.series||"").trim();
+    const m=s.match(/^(\d+)\s+series/i)||s.match(/^(\d+)\s+rondas/i)||s.match(/^(\d+)\s*x\s/i);
+    if(m) return m[1]+" rondas";
+  }
+  return null;
+}
+function parseIntensityBadge(intensidad){
+  if(!intensidad) return null;
+  const rpe=intensidad.match(/RPE\s*([\d\-]+)/i);
+  if(rpe) return {label:"RPE "+rpe[1],cls:"badge-rpe"};
+  const rir=intensidad.match(/RIR\s*(\d+)/i);
+  if(rir) return {label:"RIR "+rir[1],cls:"badge-rir"};
+  const z=intensidad.match(/Z(\d)/i);
+  if(z) return {label:"Z"+z[1],cls:"badge-z"+z[1]};
+  return null;
+}
+
+/* ══════════════════════════════════════════════════
+   SIMPLE CARD — cardio, movilidad, activación, estiramiento
+   Solo muestra info + campo de tiempo/resultado + comentario
+   ══════════════════════════════════════════════════ */
+function SimpleCard({ semana, diaIdx, faseIdx, exIdx, ejercicio, tracking, onChange, readOnly }){
+  const k=exKey(semana,diaIdx,faseIdx,exIdx);
+  const data=tracking[k]||{resultado:"",comentario:"",video:"",done:false};
+  const [showVideo,setShowVideo]=useState(false);
+  const upd=(patch)=>{ if(readOnly) return; onChange(k,{...data,...patch}); };
+  const hasVideo=data.video&&data.video.trim().length>0;
+  const badge=parseIntensityBadge(ejercicio.intensidad);
+  const hasAnyData=data.resultado||data.comentario||data.done;
+
+  return (
+    <div className="ex-card2" style={{borderLeft:"3px solid var(--line-soft)"}}>
+      <div className="ex2-header">
+        <div className="ex2-name">{ejercicio.nombre}</div>
+        <div className="ex2-badges">
+          {ejercicio.series && <span className="badge-series" style={{background:"none",border:"none",color:"var(--text-dim)",fontFamily:"var(--font-mono)",fontSize:"11px",padding:"0"}}>{ejercicio.series}</span>}
+          {badge && <span className={"badge-int "+badge.cls}>{badge.label}</span>}
+        </div>
+      </div>
+      {ejercicio.detalle && <div className="ex2-detail">{ejercicio.detalle}</div>}
+      {ejercicio.descanso && ejercicio.descanso!=="-" && (
+        <div className="ex2-descanso">Pausa: {ejercicio.descanso}</div>
+      )}
+      <div style={{display:"flex",gap:"8px",marginTop:"8px",alignItems:"center"}}>
+        <button
+          style={{background:"none",border:"1px solid var(--line)",
+            color:hasAnyData?"var(--lime)":"var(--text-faint)",
+            borderRadius:"5px",padding:"3px 10px",fontSize:"10px",
+            fontFamily:"var(--font-mono)",textTransform:"uppercase",letterSpacing:"0.03em"}}
+          onClick={()=>setShowVideo(s=>!s)}
+        >
+          {showVideo?"Cerrar":(hasAnyData?"Ver registro":"+ Registrar")}
+        </button>
+        {!showVideo && hasVideo && (
+          <button style={{background:"none",border:"1px solid var(--blue)",color:"var(--blue)",
+            borderRadius:"5px",padding:"3px 10px",fontSize:"10px",fontFamily:"var(--font-mono)",
+            textTransform:"uppercase"}}
+            onClick={()=>window.open(data.video,"_blank")}>▶ Video</button>
+        )}
+      </div>
+      {showVideo && (
+        <div style={{marginTop:"8px",display:"flex",flexDirection:"column",gap:"7px"}}>
+          <div className="ex2-video-row">
+            <input className="ex2-video-input" type="text" placeholder="Link del video (YouTube, Instagram...)"
+              value={data.video||""} onChange={e=>upd({video:e.target.value})} readOnly={readOnly}/>
+            {hasVideo && <button className="ex2-video-go" onClick={()=>window.open(data.video,"_blank")}>▶</button>}
+          </div>
+          <div>
+            <div style={{fontFamily:"var(--font-mono)",fontSize:"9.5px",textTransform:"uppercase",letterSpacing:"0.04em",color:"var(--text-faint)",marginBottom:"3px"}}>Tiempo / resultado</div>
+            <input type="text" placeholder="ej. 12 min completados, 4:55/km..."
+              value={data.resultado||""} onChange={e=>upd({resultado:e.target.value})} readOnly={readOnly}
+              className="ex2-input" style={{width:"100%"}}/>
+          </div>
+          <textarea placeholder="Comentarios (sensaciones, energia, dolor...)"
+            value={data.comentario||""} onChange={e=>upd({comentario:e.target.value})} readOnly={readOnly}
+            className="ex2-textarea"/>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   EXERCISE CARD — fuerza (tabla de series kg+reps)
+   ══════════════════════════════════════════════════ */
+function ExerciseCard({ semana, diaIdx, faseIdx, exIdx, ejercicio, tracking, onChange, readOnly }){
+  const k=exKey(semana,diaIdx,faseIdx,exIdx);
+  const data=tracking[k]||{series:[],comentario:"",video:"",done:false};
+  const numSeries=parseSeries(ejercicio.series);
+  const badge=parseIntensityBadge(ejercicio.intensidad);
+  const hasVideo=data.video&&data.video.trim().length>0;
+  const upd=(patch)=>{ if(readOnly) return; onChange(k,{...data,...patch}); };
+  const updSerie=(idx,field,val)=>{
+    if(readOnly) return;
+    const arr=[...(data.series||[])];
+    while(arr.length<=idx) arr.push({kg:"",reps:""});
+    arr[idx]={...arr[idx],[field]:val};
+    onChange(k,{...data,series:arr});
+  };
+  const getSerie=(idx)=>(data.series&&data.series[idx])||{kg:"",reps:""};
+
+  return (
+    <div className="ex-card2">
+      <div className="ex2-header">
+        <div className="ex2-name">{ejercicio.nombre}</div>
+        <div className="ex2-badges">
+          {ejercicio.series&&<span className="badge-series">{ejercicio.series.split(" x ")[0].replace(/series?/i,"").trim()} SERIES</span>}
+          {ejercicio.series&&ejercicio.series.includes(" x ")&&<span className="badge-reps">{ejercicio.series.split(" x ")[1]}</span>}
+          {badge&&<span className={"badge-int "+badge.cls}>{badge.label}</span>}
+        </div>
+      </div>
+      {ejercicio.detalle&&<div className="ex2-detail">{ejercicio.detalle}</div>}
+      {ejercicio.descanso&&ejercicio.descanso!=="-"&&<div className="ex2-descanso">Descanso: {ejercicio.descanso}</div>}
+      <div className="ex2-video-row">
+        <input className="ex2-video-input" type="text" placeholder="Pegar link del video aqui..."
+          value={data.video||""} onChange={e=>upd({video:e.target.value})} readOnly={readOnly}/>
+        {hasVideo&&<button className="ex2-video-go" onClick={()=>window.open(data.video,"_blank")}>▶</button>}
+      </div>
+      <div className="ex2-series-block">
+        <div className="ex2-series-label">TU REGISTRO</div>
+        <div className="ex2-series-table">
+          <div className="ex2-series-thead">
+            <span className="ex2-th-serie">Serie</span>
+            <span className="ex2-th-kg">Kg</span>
+            <span className="ex2-th-reps">Reps logradas</span>
+          </div>
+          {Array.from({length:numSeries},(_,i)=>{
+            const s=getSerie(i);
+            return (
+              <div key={i} className="ex2-series-row">
+                <span className="ex2-td-serie">#{i+1}</span>
+                <div className="ex2-td-kg"><input type="text" inputMode="decimal" placeholder="—"
+                  value={s.kg||""} onChange={e=>updSerie(i,"kg",e.target.value)}
+                  readOnly={readOnly} className="ex2-input"/></div>
+                <div className="ex2-td-reps"><input type="text" placeholder="—"
+                  value={s.reps||""} onChange={e=>updSerie(i,"reps",e.target.value)}
+                  readOnly={readOnly} className="ex2-input"/></div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="ex2-comentario">
+        <textarea placeholder="Comentarios (sensacion, dolor, energia, tecnica...)"
+          value={data.comentario||""} onChange={e=>upd({comentario:e.target.value})}
+          readOnly={readOnly} className="ex2-textarea"/>
+      </div>
+    </div>
+  );
+}
+
+/* ── Decide qué card usar por ejercicio ── */
+function AutoCard(props){
+  if(isCardioOrMobility(props.ejercicio, props.faseNombre)){
+    return <SimpleCard {...props}/>;
+  }
+  return <ExerciseCard {...props}/>;
+}
+
+/* ══════════════════════════════════════════════════
+   CR STEP — paso de circuito CR
+   ══════════════════════════════════════════════════ */
+function CRStep({ stepNum, ejercicio, k, tracking, onChange, readOnly }){
+  const data=tracking[k]||{kg:"",reps:"",comentario:"",video:"",done:false};
+  const [show,setShow]=useState(false);
+  const upd=(field,val)=>{ if(readOnly) return; onChange(k,{...data,[field]:val}); };
+  const hasVideo=data.video&&data.video.trim().length>0;
+  const hasAnyData=data.kg||data.reps||data.comentario||data.done;
+  return (
+    <div className="cr-row">
+      <div className="cr-row-main">
+        <div className="cr-step-num">{stepNum}</div>
+        <div className="cr-step-body">
+          <div className="cr-step-name">{ejercicio.nombre}</div>
+          {ejercicio.detalle&&<div className="cr-step-detail">{ejercicio.detalle}</div>}
+          <div className="cr-step-meta">
+            <span className="cr-meta-qty">{ejercicio.series}</span>
+            <span className={intensityClass(ejercicio.intensidad)}>{ejercicio.intensidad}</span>
+            {ejercicio.descanso&&ejercicio.descanso!=="-"&&<span className="cr-meta-pause">{ejercicio.descanso}</span>}
+          </div>
+          <div style={{display:"flex",gap:"8px",marginTop:"7px"}}>
+            <button style={{background:"none",border:"1px solid var(--line)",color:hasAnyData?"var(--lime)":"var(--text-faint)",
+              borderRadius:"5px",padding:"3px 9px",fontSize:"10px",fontFamily:"var(--font-mono)",textTransform:"uppercase",letterSpacing:"0.03em"}}
+              onClick={()=>setShow(s=>!s)}>
+              {show?"Ocultar":(hasAnyData?"Ver registro":"+ Registrar")}
+            </button>
+            <button style={{background:"none",border:"1px solid var(--line)",color:hasVideo?"var(--blue)":"var(--text-faint)",
+              borderRadius:"5px",padding:"3px 9px",fontSize:"10px",fontFamily:"var(--font-mono)",textTransform:"uppercase",letterSpacing:"0.03em"}}
+              onClick={()=>setShow(true)}>
+              {hasVideo?"▶ Video":"+ Video"}
+            </button>
+          </div>
+        </div>
+      </div>
+      {show&&(
+        <div className="cr-tracking">
+          <div className="cr-video-row">
+            <input className="cr-video-input" type="text" placeholder="Link del video..."
+              value={data.video} onChange={e=>upd("video",e.target.value)} readOnly={readOnly}/>
+            {hasVideo&&<button className="cr-video-btn" onClick={()=>window.open(data.video,"_blank")}>Abrir</button>}
+          </div>
+          <div className="cr-track-row">
+            <div className="cr-track-field"><label>Peso / carga</label>
+              <input type="text" inputMode="decimal" placeholder="ej. 80kg / 1:45min"
+                value={data.kg} onChange={e=>upd("kg",e.target.value)} readOnly={readOnly}/></div>
+            <div className="cr-track-field"><label>Resultado</label>
+              <input type="text" placeholder="ej. completado"
+                value={data.reps} onChange={e=>upd("reps",e.target.value)} readOnly={readOnly}/></div>
+          </div>
+          <div className="cr-track-field" style={{marginBottom:"6px"}}><label>Comentarios</label>
+            <textarea placeholder="Sensaciones, tecnica, fatiga..."
+              value={data.comentario} onChange={e=>upd("comentario",e.target.value)} readOnly={readOnly}/>
+          </div>
+          <label className="cr-check">
+            <input type="checkbox" checked={!!data.done} onChange={e=>upd("done",e.target.checked)} disabled={readOnly}/>
+            <span>{readOnly?(hasAnyData?"Registrado":"Sin registrar"):"Marcar como completado"}</span>
+          </label>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   COMPROMISED RUNNING BLOCK
+   ══════════════════════════════════════════════════ */
+function CompromisedRunningBlock({ fase, faseIdx, semana, diaIdx, tracking, onChange, readOnly }){
+  const rondas=parseRondas(fase.ejercicios);
+  const n=fase.ejercicios.length;
+  const titulo=crBlockTitle(fase.fase);
+  const hint=`Circuito intercalado: completás los ${n} pasos en orden y eso es 1 ronda completa. Descansás al finalizar la ronda, no entre pasos. NO terminés todas las series de un ejercicio antes de pasar al siguiente.`;
+  return (
+    <div className="cr-block">
+      <div className="cr-header">
+        <div className="cr-header-left">
+          <div className="cr-letter">C</div>
+          <div className="cr-title">{titulo}</div>
+          {rondas&&<span className="cr-rounds-badge">{rondas}</span>}
+        </div>
+        <span className="cr-time">{estimateCRTime(n)}</span>
+      </div>
+      <div className="cr-hint"><span className="cr-hint-icon">↻</span><span>{hint}</span></div>
+      <table className="cr-table" style={{width:"100%"}}>
+        <thead className="cr-table-head">
+          <tr><th style={{paddingLeft:"32px",width:"100%"}}>Paso de la ronda</th></tr>
+        </thead>
+        <tbody>
+          {fase.ejercicios.map((ej,exIdx)=>(
+            <CRStep key={exIdx} stepNum={exIdx+1} ejercicio={ej}
+              k={exKey(semana,diaIdx,faseIdx,exIdx)}
+              tracking={tracking} onChange={onChange} readOnly={readOnly}/>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SESSION VIEW
+   ══════════════════════════════════════════════════ */
+function SessionView({ semana, diaIdx, sesion, tracking, onChange, onToggleDayDone, readOnly }){
+  const dk=dayKey(semana,diaIdx);
+  const dayDone=!!tracking[dk];
+  return (
+    <div className="session">
+      <div className="session-head">
+        <h2>{sesion.titulo}</h2>
+        {sesion.notas&&<div className="session-notes" dangerouslySetInnerHTML={{__html:"<b>Nota del coach:</b> "+sesion.notas}}/>}
+      </div>
+      {sesion.fases.map((fase,faseIdx)=>{
+        if(isRealCR(fase)){
+          return <CompromisedRunningBlock key={faseIdx} fase={fase} faseIdx={faseIdx}
+            semana={semana} diaIdx={diaIdx} tracking={tracking} onChange={onChange} readOnly={readOnly}/>;
+        }
+        return (
+          <div className="phase" key={faseIdx}>
+            <div className="phase-head"><div className="phase-bar"></div><h3>{fase.fase}</h3></div>
+            {fase.ejercicios.map((ej,exIdx)=>(
+              <AutoCard key={exIdx} semana={semana} diaIdx={diaIdx} faseIdx={faseIdx} exIdx={exIdx}
+                ejercicio={ej} faseNombre={fase.fase} tracking={tracking} onChange={onChange} readOnly={readOnly}/>
+            ))}
+          </div>
+        );
+      })}
+      {readOnly?(
+        <div className={"complete-day-btn"+(dayDone?" done":"")} style={{display:"flex",alignItems:"center",justifyContent:"center",cursor:"default"}}>
+          {dayDone?"✓ El alumno completo esta sesion":"El alumno aun no completo esta sesion"}
+        </div>
+      ):(
+        <button className={"complete-day-btn"+(dayDone?" done":"")} onClick={()=>onToggleDayDone(dk)}>
+          {dayDone?"✓ Sesion marcada como completada":"Marcar sesion como completada"}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ── PROGRESS TRACK ── */
+function WeekProgressTrack({ tracking, currentWeek }){
+  const comp=programa.filter(w=>w.sesiones.every((_,di)=>tracking[dayKey(w.semana,di)])).length;
+  return (
+    <div className="track-wrap">
+      <div className="track-label-row">
+        <span className="track-label">Progreso del plan</span>
+        <span className="track-label"><b>{comp}</b> / {programa.length} semanas</span>
+      </div>
+      <div className="track-lanes">
+        {programa.map(w=>{
+          const done=w.sesiones.every((_,di)=>tracking[dayKey(w.semana,di)]);
+          const cur=w.semana===currentWeek;
+          return <div key={w.semana} className={"lane"+(done?" done":cur?" current":"")}></div>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ── GUIDE ── */
+function GuideSection(){
+  return (
+    <div className="info-section">
+      <div className="info-card">
+        <h3>Estructura del bloque (8 semanas)</h3>
+        <p><b>Bloque 1 (sem 1-4) — Acumulación:</b> foco en técnica, RIR 2-3, construcción de volumen tolerable. Es donde se sientan las bases del resto del plan.</p>
+        <p><b>Bloque 2 (sem 5-7) — Intensificación:</b> mismo volumen pero acercándonos más al fallo técnico (RIR 1-2), y una serie extra en el ejercicio principal de cada día.</p>
+        <p><b>Bloque 3 (sem 8) — Descarga:</b> bajamos el volumen a propósito (~40% menos series) manteniendo la intensidad relativa. Esto permite recuperar y consolidar antes del próximo bloque.</p>
+      </div>
+      <div className="info-card">
+        <h3>Cómo aplicar la doble progresión</h3>
+        <p>Cada ejercicio tiene un rango de reps (ej. 8-10). Empezá siempre en el extremo inferior. Mientras no llegues al tope superior en <b>todas</b> las series, mantené el mismo peso.</p>
+        <p>Cuando completes el tope superior en todas las series con el RIR pedido, la próxima sesión subís un escalón de peso (2,5 kg, el mínimo que permiten tus mancuernas ajustables).</p>
+      </div>
+      <div className="info-card">
+        <h3>Fase D — Cardio opcional</h3>
+        <p>Es un complemento, no el eje del entrenamiento. Priorizá siempre completar la Fase B y C con buena técnica antes de forzar el cardio. Si un día llegás con poca energía, está bien saltearla.</p>
+        <p>Los <b>Días 1 y 3</b> proponen un circuito corto sin material (sentadillas, mountain climbers, flexiones, burpees, jumping jacks) para no depender de las mancuernas. El <b>Día 2</b> es una salida en bicicleta al aire libre, a ritmo conversable — pura base aeróbica, sin buscar velocidad.</p>
+      </div>
+      <div className="info-card">
+        <h3>Solo mancuernas: adaptaciones del plan</h3>
+        <p>Como no hay banco ni barra de dominadas, el press de pecho se hace en el piso (Floor Press, que limita el rango y protege el hombro) y el trabajo de espalda se apoya en remos y peso muerto rumano en vez de dominadas.</p>
+      </div>
+      <div className="info-card">
+        <h3>Exportar e importar progreso</h3>
+        <p><b>Alumno:</b> "Exportar progreso" descarga tu .json con todo registrado. Mandáselo a tu coach cuando te lo pida.</p>
+        <p><b>Coach:</b> "Importar" carga el .json del alumno en modo solo lectura para hacer seguimiento.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ── STATS ── */
+function StatsSection({ tracking }){
+  const total=programa.reduce((a,w)=>a+w.sesiones.length,0);
+  const done=programa.reduce((a,w)=>a+w.sesiones.filter((_,di)=>tracking[dayKey(w.semana,di)]).length,0);
+  let totalKg=0,cnt=0;
+  Object.keys(tracking).forEach(k=>{
+    const v=tracking[k];
+    if(k.includes("_e")&&v){
+      if(v.series) v.series.forEach(s=>{ const n=parseFloat(s.kg); if(!isNaN(n)){totalKg+=n;cnt++;} });
+      else if(v.kg){ const n=parseFloat(v.kg); if(!isNaN(n)){totalKg+=n;cnt++;} }
+    }
+  });
+  return (
+    <div className="stat-grid">
+      <div className="stat-card"><div className="s-label">Sesiones completadas</div><div className="s-val">{done}/{total}</div></div>
+      <div className="stat-card"><div className="s-label">% del plan avanzado</div><div className="s-val">{Math.round((done/total)*100)}%</div></div>
+      <div className="stat-card"><div className="s-label">Carga prom. registrada</div><div className="s-val">{cnt>0?Math.round(totalKg/cnt):0} kg</div></div>
+      <div className="stat-card"><div className="s-label">Semanas completadas</div><div className="s-val">{programa.filter(w=>w.sesiones.every((_,di)=>tracking[dayKey(w.semana,di)])).length}/{programa.length}</div></div>
+    </div>
+  );
+}
+
+/* ── APP ── */
+function App(){
+  const [tracking,setTracking]=useState(()=>loadTracking());
+  const [currentWeek,setCurrentWeek]=useState(1);
+  const [currentDay,setCurrentDay]=useState(0);
+  const [mainTab,setMainTab]=useState("plan");
+  const [importedData,setImportedData]=useState(null);
+  const [importError,setImportError]=useState("");
+  const fileInputRef=useRef(null);
+
+  useEffect(()=>{ if(!importedData) saveTracking(tracking); },[tracking,importedData]);
+  const weekData=useMemo(()=>programa.find(w=>w.semana===currentWeek),[currentWeek]);
+  const activeTracking=importedData?importedData.tracking:tracking;
+  const isReadOnly=!!importedData;
+
+  // ── GitHub sync ──────────────────────────────────────────────────────────────
+  const [ghToken, setGhToken] = React.useState(getToken);
+  const [syncStatus, setSyncStatus] = React.useState("");
+  const [showTokenInput, setShowTokenInput] = React.useState(!getToken());
+
+  React.useEffect(()=>{
+    // Al arrancar, intentar cargar progreso desde GitHub
+    ghLoadProgress().then(data=>{
+      if(data && data.tracking && typeof data.tracking==="object"){
+        setTracking(data.tracking);
+        saveTracking(data.tracking);
+        setSyncStatus("✓ Progreso cargado desde GitHub");
+        setTimeout(()=>setSyncStatus(""),3000);
+      }
+    });
+  },[]);
+
+  const handleSaveToken=()=>{
+    setToken(ghToken);
+    setShowTokenInput(false);
+    setSyncStatus("Token guardado");
+    setTimeout(()=>setSyncStatus(""),2000);
+  };
+
+  const handleSync=async()=>{
+    if(!getToken()){ setShowTokenInput(true); return; }
+    setSyncStatus("Sincronizando...");
+    const data={ tipo:"maxi_dumbbell8_export", version:1, alumno:"Maxi", exportadoEl:new Date().toISOString(), tracking };
+    const ok=await ghSaveProgress(data);
+    setSyncStatus(ok?"☁ Sincronizado en GitHub":"✗ Error al sincronizar");
+    setTimeout(()=>setSyncStatus(""),3000);
+  };
+
+  const handleChange=useCallback((key,val)=>{ if(!isReadOnly) setTracking(p=>({...p,[key]:val})); },[isReadOnly]);
+  const handleToggleDay=useCallback((dk)=>{ if(!isReadOnly) setTracking(p=>({...p,[dk]:!p[dk]})); },[isReadOnly]);
+
+  const handleExport=()=>{
+    const fecha=new Date().toISOString().slice(0,10);
+    downloadJSON(`progreso_Maxi_${fecha}.json`,{
+      tipo:"maxi_dumbbell8_export",version:1,alumno:"Maxi",
+      exportadoEl:new Date().toISOString(),tracking
+    });
+  };
+
+  const handleImportClick=()=>{ setImportError(""); fileInputRef.current&&fileInputRef.current.click(); };
+  const handleFileSelected=e=>{
+    const file=e.target.files&&e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        const parsed=JSON.parse(ev.target.result);
+        if(!parsed||parsed.tipo!=="maxi_dumbbell8_export"||typeof parsed.tracking!=="object"){
+          setImportError("Archivo inválido. Usá el botón 'Exportar progreso' dentro de la app."); return;
+        }
+        setImportedData(parsed); setImportError(""); setCurrentWeek(1); setCurrentDay(0);
+      }catch(err){ setImportError("No se pudo leer el archivo."); }
+    };
+    reader.readAsText(file); e.target.value="";
+  };
+
+  const handleReset=()=>{
+    if(window.confirm("Esto borra TODO tu historial. No se puede deshacer. ¿Continuar?")){
+      localStorage.removeItem(STORAGE_KEY); setTracking({});
+    }
+  };
+
+  return (
+    <div className="app">
+      <input type="file" accept="application/json" ref={fileInputRef} style={{display:"none"}} onChange={handleFileSelected}/>
+      <div className="topbar">
+        <div className="brand-row">
+          <div className="brand"><h1>PLAN DE ENTRENAMIENTO - <span className="accent">MAXI</span></h1></div>
+        </div>
+        <div className="brand-sub" style={{marginBottom:"10px"}}>Recomposición corporal · 8 semanas · Solo mancuernas</div>
+        <div className="header-actions">
+          <button className="hdr-btn export" onClick={handleExport}><span className="arrow">↓</span> Exportar progreso</button>
+          <button className="hdr-btn" onClick={handleImportClick}><span className="arrow">↑</span> Importar</button>
+          <button className="hdr-btn" onClick={handleSync} style={{borderColor:"var(--lime)",color:"var(--lime)"}}>☁ Sincronizar</button>
+          <button className="hdr-btn" onClick={handleReset}>Reiniciar datos</button>
+        </div>
+        <WeekProgressTrack tracking={activeTracking} currentWeek={currentWeek}/>
+      </div>
+
+      {importError&&<div className="import-error">{importError}</div>}
+      {syncStatus&&<div style={{margin:"8px 16px",padding:"10px 14px",borderRadius:"8px",background:"var(--surface)",border:"1px solid var(--border)",fontSize:"13px",color:"var(--lime)"}}>{syncStatus}</div>}
+      {showTokenInput&&<div style={{margin:"8px 16px",padding:"14px",borderRadius:"8px",background:"var(--surface)",border:"1px solid var(--border)"}}>
+        <div style={{fontSize:"11px",color:"var(--dim)",marginBottom:"8px",letterSpacing:".08em",textTransform:"uppercase"}}>Token de GitHub para sincronizar tu progreso</div>
+        <div style={{display:"flex",gap:"8px"}}>
+          <input type="password" value={ghToken} onChange={e=>setGhToken(e.target.value)} placeholder="ghp_..." style={{flex:1,padding:"8px",borderRadius:"6px",border:"1px solid var(--border)",background:"#1a1a1a",color:"#fff",fontSize:"13px"}}/>
+          <button onClick={handleSaveToken} style={{padding:"8px 14px",borderRadius:"6px",border:"1px solid var(--lime)",background:"transparent",color:"var(--lime)",fontSize:"13px",cursor:"pointer"}}>Guardar</button>
+          <button onClick={()=>setShowTokenInput(false)} style={{padding:"8px 14px",borderRadius:"6px",border:"1px solid var(--border)",background:"transparent",color:"var(--dim)",fontSize:"13px",cursor:"pointer"}}>Cancelar</button>
+        </div>
+        <div style={{fontSize:"11px",color:"var(--dim)",marginTop:"6px"}}>El token se guarda solo en este navegador. No se envía a ningún servidor externo.</div>
+      </div>}
+      {importedData&&(
+        <React.Fragment>
+          <div className="coach-banner">
+            <div className="c-text"><b>Viendo progreso de {importedData.alumno}</b>
+              Exportado el {new Date(importedData.exportadoEl).toLocaleDateString("es-AR")}</div>
+            <button className="coach-close-btn" onClick={()=>{setImportedData(null);setImportError("");}}>Cerrar</button>
+          </div>
+          <div className="readonly-note">Modo solo lectura — no se pueden editar los datos desde acá.</div>
+        </React.Fragment>
+      )}
+
+      <div className="main-tabs" style={{marginTop:"8px"}}>
+        <button className={"main-tab"+(mainTab==="plan"?" active":"")} onClick={()=>setMainTab("plan")}>Plan</button>
+        <button className={"main-tab"+(mainTab==="stats"?" active":"")} onClick={()=>setMainTab("stats")}>Stats</button>
+        <button className={"main-tab"+(mainTab==="guia"?" active":"")} onClick={()=>setMainTab("guia")}>Guía</button>
+      </div>
+
+      {mainTab==="plan"&&weekData&&(
+        <React.Fragment>
+          <div className="week-scroller" style={{padding:"0 16px 12px 16px"}}>
+            {programa.map(w=>{
+              const done=w.sesiones.every((_,di)=>activeTracking[dayKey(w.semana,di)]);
+              return (
+                <button key={w.semana}
+                  className={"week-pill"+(w.semana===currentWeek?" active":"")+(done?" complete":"")}
+                  onClick={()=>{setCurrentWeek(w.semana);setCurrentDay(0);}}>
+                  S{w.semana}
+                </button>
+              );
+            })}
+          </div>
+          <div className="block-banner">
+            <div className="b-title">{weekData.bloque}</div>
+            <div className="b-sub">{weekData.fase_bloque}</div>
+          </div>
+          <div className="day-nav">
+            {weekData.sesiones.map((s,di)=>{
+              const done=!!activeTracking[dayKey(weekData.semana,di)];
+              return (
+                <button key={di} className={"day-tab"+(di===currentDay?" active":"")} onClick={()=>setCurrentDay(di)}>
+                  <span className={"dot"+(done?" done":"")}></span>{s.dia}
+                </button>
+              );
+            })}
+          </div>
+          <div style={{padding:"0 16px 8px 16px",display:"flex",justifyContent:"flex-end"}}>
+            <span className={typeClass(weekData.sesiones[currentDay].tipo)+" type-badge"}>
+              {weekData.sesiones[currentDay].tipo}
+            </span>
+          </div>
+          <SessionView semana={weekData.semana} diaIdx={currentDay}
+            sesion={weekData.sesiones[currentDay]} tracking={activeTracking}
+            onChange={handleChange} onToggleDayDone={handleToggleDay} readOnly={isReadOnly}/>
+        </React.Fragment>
+      )}
+
+      {mainTab==="stats"&&<div style={{padding:"4px 0"}}><StatsSection tracking={activeTracking}/></div>}
+      {mainTab==="guia"&&<GuideSection/>}
+
+      <div className="footer-note">
+        PLAN DE ENTRENAMIENTO · MAXI · 8 semanas<br/>
+        Tus datos se guardan únicamente en este dispositivo
+      </div>
+    </div>
+  );
+}
+
+const root=ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App/>);
+</script>
+</body>
+</html>
