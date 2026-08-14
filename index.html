@@ -953,9 +953,18 @@ function GuideSection(){
         <p>Como no hay banco ni barra de dominadas, el press de pecho se hace en el piso (Floor Press, que limita el rango y protege el hombro) y el trabajo de espalda se apoya en remos y peso muerto rumano en vez de dominadas.</p>
       </div>
       <div className="info-card">
-        <h3>Exportar e importar progreso</h3>
-        <p><b>Alumno:</b> "Exportar progreso" descarga tu .json con todo registrado. Mandáselo a tu coach cuando te lo pida.</p>
-        <p><b>Coach:</b> "Importar" carga el .json del alumno en modo solo lectura para hacer seguimiento.</p>
+        <h3>Sincronizar y Actualizar</h3>
+        <p>Ya no hace falta exportar ni importar archivos. Todo se guarda solo en la nube (ver "Guardado automático" abajo). Los dos botones que quedan en el header sirven para forzar algo puntual:</p>
+        <p><b>"Actualizar":</b> trae la última versión guardada desde GitHub y la muestra acá. Usalo cuando quieras ver, desde tu celular, lo que el alumno cargó desde el suyo.</p>
+        <p><b>"Sincronizar ahora":</b> fuerza la subida de lo que tenés cargado en este dispositivo en este momento, sin esperar los 2 segundos del autoguardado.</p>
+      </div>
+      <div className="info-card">
+        <h3>Guardado automático</h3>
+        <p>No hace falta que toques "Sincronizar ahora": cada dato que cargás se guarda en tu celular al instante, y a los 2 segundos de dejar de tocar se sube solo a la nube (siempre que ya hayas pegado tu token una vez). Si cerrás la pestaña, hacés refresh o se apaga la pantalla, también se intenta guardar automáticamente antes de que eso pase.</p>
+      </div>
+      <div className="info-card">
+        <h3>Modo lectura (para el coach)</h3>
+        <p>Si abrís este mismo link para ver el progreso de tu alumno, activá "Modo lectura: ON" antes de tocar nada. Así ves todo lo que cargó pero no corrés riesgo de escribir algo sin querer y que se te suba a la nube pisando sus datos reales. Tocá "Actualizar" para traer lo último, y cuando termines de mirar podés dejarlo prendido — no afecta nada mientras esté en modo lectura.</p>
       </div>
     </div>
   );
@@ -989,31 +998,74 @@ function App(){
   const [currentWeek,setCurrentWeek]=useState(1);
   const [currentDay,setCurrentDay]=useState(0);
   const [mainTab,setMainTab]=useState("plan");
-  const [importedData,setImportedData]=useState(null);
-  const [importError,setImportError]=useState("");
-  const fileInputRef=useRef(null);
+  const [readOnlyMode,setReadOnlyMode]=useState(()=>localStorage.getItem("maxi_readonly_mode")==="1");
 
-  useEffect(()=>{ if(!importedData) saveTracking(tracking); },[tracking,importedData]);
+  useEffect(()=>{ saveTracking(tracking); },[tracking]);
   const weekData=useMemo(()=>programa.find(w=>w.semana===currentWeek),[currentWeek]);
-  const activeTracking=importedData?importedData.tracking:tracking;
-  const isReadOnly=!!importedData;
+  const activeTracking=tracking;
+  const isReadOnly=readOnlyMode;
 
   // ── GitHub sync ──────────────────────────────────────────────────────────────
   const [ghToken, setGhToken] = React.useState(getToken);
   const [syncStatus, setSyncStatus] = React.useState("");
   const [showTokenInput, setShowTokenInput] = React.useState(!getToken());
+  const autoSyncTimerRef = useRef(null);
+  const skipNextAutoSyncRef = useRef(true);
+  const trackingRef = useRef(tracking);
+  useEffect(()=>{ trackingRef.current = tracking; },[tracking]);
 
-  React.useEffect(()=>{
-    // Al arrancar, intentar cargar progreso desde GitHub
-    ghLoadProgress().then(data=>{
+  const pullFromCloud=useCallback((silent)=>{
+    return ghLoadProgress().then(data=>{
       if(data && data.tracking && typeof data.tracking==="object"){
+        skipNextAutoSyncRef.current = true;
         setTracking(data.tracking);
         saveTracking(data.tracking);
-        setSyncStatus("✓ Progreso cargado desde GitHub");
-        setTimeout(()=>setSyncStatus(""),3000);
+        setSyncStatus(silent?"":"✓ Progreso actualizado desde GitHub");
+        if(!silent) setTimeout(()=>setSyncStatus(""),3000);
+        return true;
       }
+      if(!silent) setSyncStatus("Sin datos en la nube todavía");
+      if(!silent) setTimeout(()=>setSyncStatus(""),2500);
+      return false;
     });
   },[]);
+
+  React.useEffect(()=>{ pullFromCloud(true); },[]);
+
+  // ── Autoguardado + auto-sincronización con GitHub ──────────────────────────
+  useEffect(()=>{
+    if(readOnlyMode) return;
+    if(skipNextAutoSyncRef.current){ skipNextAutoSyncRef.current=false; return; }
+    if(!getToken()) return;
+    if(autoSyncTimerRef.current) clearTimeout(autoSyncTimerRef.current);
+    autoSyncTimerRef.current = setTimeout(async ()=>{
+      const data={ tipo:"maxi_dumbbell8_export", version:1, alumno:"Maxi", exportadoEl:new Date().toISOString(), tracking };
+      const ok = await ghSaveProgress(data);
+      if(ok){
+        setSyncStatus("☁ Guardado automático · "+new Date().toLocaleTimeString());
+        setTimeout(()=>setSyncStatus(""),2500);
+      }
+    }, 2000);
+    return ()=>{ if(autoSyncTimerRef.current) clearTimeout(autoSyncTimerRef.current); };
+  },[tracking, readOnlyMode]);
+
+  // Respaldo extra: si la pestaña se oculta (refresh, cambio de app, pantalla apagada), sincronizar ya
+  useEffect(()=>{
+    const flush=()=>{
+      if(readOnlyMode) return;
+      if(!getToken()) return;
+      if(autoSyncTimerRef.current){ clearTimeout(autoSyncTimerRef.current); autoSyncTimerRef.current=null; }
+      const data={ tipo:"maxi_dumbbell8_export", version:1, alumno:"Maxi", exportadoEl:new Date().toISOString(), tracking:trackingRef.current };
+      ghSaveProgress(data);
+    };
+    const onVis=()=>{ if(document.visibilityState==="hidden") flush(); };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pagehide", flush);
+    return ()=>{
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("pagehide", flush);
+    };
+  },[readOnlyMode]);
 
   const handleSaveToken=()=>{
     setToken(ghToken);
@@ -1031,32 +1083,19 @@ function App(){
     setTimeout(()=>setSyncStatus(""),3000);
   };
 
+  const handleRefresh=async()=>{
+    setSyncStatus("Actualizando...");
+    await pullFromCloud(false);
+  };
+
+  const toggleReadOnlyMode=()=>{
+    const next=!readOnlyMode;
+    setReadOnlyMode(next);
+    localStorage.setItem("maxi_readonly_mode", next?"1":"0");
+  };
+
   const handleChange=useCallback((key,val)=>{ if(!isReadOnly) setTracking(p=>({...p,[key]:val})); },[isReadOnly]);
   const handleToggleDay=useCallback((dk)=>{ if(!isReadOnly) setTracking(p=>({...p,[dk]:!p[dk]})); },[isReadOnly]);
-
-  const handleExport=()=>{
-    const fecha=new Date().toISOString().slice(0,10);
-    downloadJSON(`progreso_Maxi_${fecha}.json`,{
-      tipo:"maxi_dumbbell8_export",version:1,alumno:"Maxi",
-      exportadoEl:new Date().toISOString(),tracking
-    });
-  };
-
-  const handleImportClick=()=>{ setImportError(""); fileInputRef.current&&fileInputRef.current.click(); };
-  const handleFileSelected=e=>{
-    const file=e.target.files&&e.target.files[0]; if(!file) return;
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      try{
-        const parsed=JSON.parse(ev.target.result);
-        if(!parsed||parsed.tipo!=="maxi_dumbbell8_export"||typeof parsed.tracking!=="object"){
-          setImportError("Archivo inválido. Usá el botón 'Exportar progreso' dentro de la app."); return;
-        }
-        setImportedData(parsed); setImportError(""); setCurrentWeek(1); setCurrentDay(0);
-      }catch(err){ setImportError("No se pudo leer el archivo."); }
-    };
-    reader.readAsText(file); e.target.value="";
-  };
 
   const handleReset=()=>{
     if(window.confirm("Esto borra TODO tu historial. No se puede deshacer. ¿Continuar?")){
@@ -1066,22 +1105,20 @@ function App(){
 
   return (
     <div className="app">
-      <input type="file" accept="application/json" ref={fileInputRef} style={{display:"none"}} onChange={handleFileSelected}/>
       <div className="topbar">
         <div className="brand-row">
           <div className="brand"><h1>PLAN DE ENTRENAMIENTO - <span className="accent">MAXI</span></h1></div>
         </div>
         <div className="brand-sub" style={{marginBottom:"10px"}}>Recomposición corporal · 8 semanas · Solo mancuernas</div>
         <div className="header-actions">
-          <button className="hdr-btn export" onClick={handleExport}><span className="arrow">↓</span> Exportar progreso</button>
-          <button className="hdr-btn" onClick={handleImportClick}><span className="arrow">↑</span> Importar</button>
-          <button className="hdr-btn" onClick={handleSync} style={{borderColor:"var(--lime)",color:"var(--lime)"}}>☁ Sincronizar</button>
+          <button className="hdr-btn" onClick={handleRefresh}><span className="arrow">↻</span> Actualizar</button>
+          <button className="hdr-btn" onClick={handleSync} style={{borderColor:"var(--lime)",color:"var(--lime)"}}>☁ Sincronizar ahora</button>
+          <button className="hdr-btn" onClick={toggleReadOnlyMode} style={readOnlyMode?{borderColor:"var(--cyan)",color:"var(--cyan)"}:{}}>{readOnlyMode?"👁 Modo lectura: ON":"👁 Modo lectura: OFF"}</button>
           <button className="hdr-btn" onClick={handleReset}>Reiniciar datos</button>
         </div>
         <WeekProgressTrack tracking={activeTracking} currentWeek={currentWeek}/>
       </div>
 
-      {importError&&<div className="import-error">{importError}</div>}
       {syncStatus&&<div style={{margin:"8px 16px",padding:"10px 14px",borderRadius:"8px",background:"var(--surface)",border:"1px solid var(--border)",fontSize:"13px",color:"var(--lime)"}}>{syncStatus}</div>}
       {showTokenInput&&<div style={{margin:"8px 16px",padding:"14px",borderRadius:"8px",background:"var(--surface)",border:"1px solid var(--border)"}}>
         <div style={{fontSize:"11px",color:"var(--dim)",marginBottom:"8px",letterSpacing:".08em",textTransform:"uppercase"}}>Token de GitHub para sincronizar tu progreso</div>
@@ -1092,15 +1129,8 @@ function App(){
         </div>
         <div style={{fontSize:"11px",color:"var(--dim)",marginTop:"6px"}}>El token se guarda solo en este navegador. No se envía a ningún servidor externo.</div>
       </div>}
-      {importedData&&(
-        <React.Fragment>
-          <div className="coach-banner">
-            <div className="c-text"><b>Viendo progreso de {importedData.alumno}</b>
-              Exportado el {new Date(importedData.exportadoEl).toLocaleDateString("es-AR")}</div>
-            <button className="coach-close-btn" onClick={()=>{setImportedData(null);setImportError("");}}>Cerrar</button>
-          </div>
-          <div className="readonly-note">Modo solo lectura — no se pueden editar los datos desde acá.</div>
-        </React.Fragment>
+      {readOnlyMode&&(
+        <div className="readonly-note">Modo lectura activado en este dispositivo — no se pueden editar los datos, y no se van a subir cambios accidentales a la nube. Tocá "Modo lectura: ON" para volver a editar.</div>
       )}
 
       <div className="main-tabs" style={{marginTop:"8px"}}>
