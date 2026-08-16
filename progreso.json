@@ -2,7 +2,7 @@
   "tipo": "maxi_dumbbell8_export",
   "version": 1,
   "alumno": "Maxi",
-  "exportadoEl": "2026-08-16T21:43:43.367Z",
+  "exportadoEl": "2026-08-16T21:43:56.462Z",
   "tracking": {
     "s1_d0_f0_e0": {
       "resultado": "",
@@ -217,6 +217,21 @@
       "videos": [
         "https://youtube.com/shorts/mDD3v72O_kc?feature=share"
       ]
+    },
+    "s1_d2_f0_e3": {
+      "resultado": "",
+      "comentario": "",
+      "video": "",
+      "done": false,
+      "videos": [
+        "https://youtube.com/shorts/WEXqOQvhvCk?feature=share"
+      ]
+    },
+    "s1_d2_f1_e0": {
+      "series": [],
+      "comentario": "",
+      "video": "https://youtube.com/shorts/WEXqOQvhvCk?feature=share",
+      "done": false
     }
   }
 }
