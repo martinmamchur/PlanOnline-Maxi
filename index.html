@@ -686,7 +686,24 @@ function SimpleCard({ semana, diaIdx, faseIdx, exIdx, ejercicio, tracking, onCha
   const data=tracking[k]||{resultado:"",comentario:"",video:"",done:false};
   const [showVideo,setShowVideo]=useState(false);
   const upd=(patch)=>{ if(readOnly) return; onChange(k,{...data,...patch}); };
-  const hasVideo=data.video&&data.video.trim().length>0;
+  // videos: array de links. Compatibilidad con el campo viejo 'video' (string único).
+  const videoList = (data.videos && data.videos.length) ? data.videos : (data.video ? [data.video] : [""]);
+  const updVideo=(idx,val)=>{
+    if(readOnly) return;
+    const next=[...videoList]; next[idx]=val;
+    onChange(k,{...data,videos:next});
+  };
+  const addVideoField=()=>{
+    if(readOnly) return;
+    onChange(k,{...data,videos:[...videoList,""]});
+  };
+  const removeVideoField=(idx)=>{
+    if(readOnly) return;
+    const next=videoList.filter((_,i)=>i!==idx);
+    onChange(k,{...data,videos:next.length?next:[""]});
+  };
+  const hasVideo=videoList.some(v=>v&&v.trim().length>0);
+  const firstVideo=videoList.find(v=>v&&v.trim().length>0);
   const badge=parseIntensityBadge(ejercicio.intensidad);
   const hasAnyData=data.resultado||data.comentario||data.done;
 
@@ -717,16 +734,30 @@ function SimpleCard({ semana, diaIdx, faseIdx, exIdx, ejercicio, tracking, onCha
           <button style={{background:"none",border:"1px solid var(--blue)",color:"var(--blue)",
             borderRadius:"5px",padding:"3px 10px",fontSize:"10px",fontFamily:"var(--font-mono)",
             textTransform:"uppercase"}}
-            onClick={()=>openVideoModal(data.video)}>▶ Video</button>
+            onClick={()=>openVideoModal(firstVideo)}>▶ Video</button>
         )}
       </div>
       {showVideo && (
         <div style={{marginTop:"8px",display:"flex",flexDirection:"column",gap:"7px"}}>
-          <div className="ex2-video-row">
-            <input className="ex2-video-input" type="text" placeholder="Link del video (YouTube, Instagram...)"
-              value={data.video||""} onChange={e=>upd({video:e.target.value})} readOnly={readOnly}/>
-            {hasVideo && <button className="ex2-video-go" onClick={()=>openVideoModal(data.video)}>▶</button>}
-          </div>
+          {videoList.map((v,idx)=>(
+            <div key={idx} className="ex2-video-row">
+              <input className="ex2-video-input" type="text" placeholder={idx===0?"Link del video (YouTube, Instagram...)":"Link alternativo..."}
+                value={v||""} onChange={e=>updVideo(idx,e.target.value)} readOnly={readOnly}/>
+              {v && v.trim() && <button className="ex2-video-go" onClick={()=>openVideoModal(v)}>▶</button>}
+              {videoList.length>1 && !readOnly && (
+                <button className="ex2-video-go" style={{color:"var(--text-faint)",borderColor:"var(--line)"}}
+                  onClick={()=>removeVideoField(idx)} title="Quitar este link">✕</button>
+              )}
+            </div>
+          ))}
+          {!readOnly && (
+            <button
+              style={{alignSelf:"flex-start",background:"none",border:"1px dashed var(--line)",
+                color:"var(--text-dim)",borderRadius:"5px",padding:"4px 10px",fontSize:"11px",
+                fontFamily:"var(--font-mono)",cursor:"pointer"}}
+              onClick={addVideoField}
+            >+ Agregar otro link</button>
+          )}
           <div>
             <div style={{fontFamily:"var(--font-mono)",fontSize:"9.5px",textTransform:"uppercase",letterSpacing:"0.04em",color:"var(--text-faint)",marginBottom:"3px"}}>Tiempo / resultado</div>
             <input type="text" placeholder="ej. 12 min completados, 4:55/km..."
