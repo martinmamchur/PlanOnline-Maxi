@@ -676,7 +676,7 @@ function parseIntensityBadge(intensidad){
     const lo=rir[1], hi=rir[2];
     const label = hi ? `RIR ${lo}-${hi}` : `RIR ${lo}`;
     const margen = hi ? `${lo} a ${hi} repeticiones` : `${lo} repetición${lo==="1"?"":"es"}`;
-    const hint = `Al terminar la última serie, te tendrían que quedar ${margen} en el tanque antes de fallar. Si podés hacer más de eso, la próxima vez subí el peso.`;
+    const hint = `Al terminar tu última serie de hoy, te tendrían que quedar ${margen} en el tanque antes de fallar. Si te sobran más reps que eso, no cambies nada ahora — subí el peso recién la próxima vez que hagas este ejercicio.`;
     return {label, cls:"badge-rir", hint};
   }
   const z=intensidad.match(/Z(\d)/i);
@@ -1028,7 +1028,7 @@ function GuideSection(){
         <p><b>RIR 2-3</b> — Es la zona de trabajo habitual del bloque de acumulación. Esfuerzo real pero controlado: te queda margen para 2 o 3 repeticiones más.</p>
         <p><b>RIR 1-2</b> — Más exigente, zona de intensificación. Las últimas repeticiones cuestan, pero la técnica no se rompe.</p>
         <p><b>RIR 0</b> — Fallo técnico: no te queda ni una repetición más con buena forma. Rara vez lo vas a usar en este plan.</p>
-        <p>Regla práctica: si terminaste una serie y sentís que podrías haber hecho bastante más de lo que pide el RIR indicado, la próxima vez subí el peso.</p>
+        <p>Regla práctica: si terminaste tu última serie de trabajo del día y te sobraron bastantes más repeticiones de las que pide el RIR indicado, no cambies nada en esa misma sesión — subí el peso recién en la <b>próxima sesión</b> que hagas ese ejercicio. Subir de peso entre series de un mismo día no tiene sentido una vez que ya estás en series efectivas.</p>
       </div>
       <div className="info-card">
         <h3>Estructura del bloque (8 semanas)</h3>
