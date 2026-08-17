@@ -399,6 +399,7 @@
   .badge-z3{ background: #163047; color: var(--blue); }
   .badge-z4{ background: #0E2B38; color: #A9DBFF; }
   .ex2-detail{ font-size: 12.5px; color: var(--text-dim); line-height: 1.4; margin-bottom: 3px; }
+  .ex2-rir-hint{ font-size: 11.5px; color: var(--lime); line-height: 1.4; margin-bottom: 6px; opacity: 0.9; }
   .ex2-descanso{ font-size: 12px; color: var(--text-faint); margin-bottom: 8px; }
   .ex2-video-row{
     display: flex; gap: 6px; margin-bottom: 10px;
@@ -670,8 +671,14 @@ function parseIntensityBadge(intensidad){
   if(!intensidad) return null;
   const rpe=intensidad.match(/RPE\s*([\d\-]+)/i);
   if(rpe) return {label:"RPE "+rpe[1],cls:"badge-rpe"};
-  const rir=intensidad.match(/RIR\s*(\d+)/i);
-  if(rir) return {label:"RIR "+rir[1],cls:"badge-rir"};
+  const rir=intensidad.match(/RIR\s*(\d+)(?:-(\d+))?/i);
+  if(rir){
+    const lo=rir[1], hi=rir[2];
+    const label = hi ? `RIR ${lo}-${hi}` : `RIR ${lo}`;
+    const margen = hi ? `${lo} a ${hi} repeticiones` : `${lo} repetición${lo==="1"?"":"es"}`;
+    const hint = `Al terminar la última serie, te tendrían que quedar ${margen} en el tanque antes de fallar. Si podés hacer más de eso, la próxima vez subí el peso.`;
+    return {label, cls:"badge-rir", hint};
+  }
   const z=intensidad.match(/Z(\d)/i);
   if(z) return {label:"Z"+z[1],cls:"badge-z"+z[1]};
   return null;
@@ -803,6 +810,7 @@ function ExerciseCard({ semana, diaIdx, faseIdx, exIdx, ejercicio, tracking, onC
         </div>
       </div>
       {ejercicio.detalle&&<div className="ex2-detail">{ejercicio.detalle}</div>}
+      {badge&&badge.hint&&<div className="ex2-rir-hint">💡 {badge.hint}</div>}
       {ejercicio.descanso&&ejercicio.descanso!=="-"&&<div className="ex2-descanso">Descanso: {ejercicio.descanso}</div>}
       <div className="ex2-video-row">
         <input className="ex2-video-input" type="text" placeholder="Pegar link del video aqui..."
@@ -1013,6 +1021,15 @@ function WeekProgressTrack({ tracking, currentWeek }){
 function GuideSection(){
   return (
     <div className="info-section">
+      <div className="info-card">
+        <h3>¿Qué significa RIR?</h3>
+        <p>RIR = "Repeticiones en Reserva". Es cuántas repeticiones más *podrías* hacer si siguieras la serie hasta el límite. No es una sensación abstracta — pensalo así: al terminar tu última repetición, preguntate "¿cuántas más aguanto con buena técnica antes de fallar?". Esa cifra es tu RIR.</p>
+        <p><b>RIR 4-5</b> — Es la carga de las series de aproximación/calentamiento. Se siente liviano, casi cómodo.</p>
+        <p><b>RIR 2-3</b> — Es la zona de trabajo habitual del bloque de acumulación. Esfuerzo real pero controlado: te queda margen para 2 o 3 repeticiones más.</p>
+        <p><b>RIR 1-2</b> — Más exigente, zona de intensificación. Las últimas repeticiones cuestan, pero la técnica no se rompe.</p>
+        <p><b>RIR 0</b> — Fallo técnico: no te queda ni una repetición más con buena forma. Rara vez lo vas a usar en este plan.</p>
+        <p>Regla práctica: si terminaste una serie y sentís que podrías haber hecho bastante más de lo que pide el RIR indicado, la próxima vez subí el peso.</p>
+      </div>
       <div className="info-card">
         <h3>Estructura del bloque (8 semanas)</h3>
         <p><b>Bloque 1 (sem 1-4) — Acumulación:</b> foco en técnica, RIR 2-3, construcción de volumen tolerable. Es donde se sientan las bases del resto del plan.</p>
