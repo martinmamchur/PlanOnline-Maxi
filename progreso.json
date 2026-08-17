@@ -2,7 +2,7 @@
   "tipo": "maxi_dumbbell8_export",
   "version": 1,
   "alumno": "Maxi",
-  "exportadoEl": "2026-08-17T16:10:42.007Z",
+  "exportadoEl": "2026-08-17T16:12:45.312Z",
   "tracking": {
     "s1_d0_f0_e0": {
       "resultado": "",
@@ -178,7 +178,7 @@
       "done": false
     },
     "s1_d0_f3_e0": {
-      "resultado": "",
+      "resultado": "ejercicios completados en 1:20",
       "comentario": "",
       "video": "",
       "done": false,
