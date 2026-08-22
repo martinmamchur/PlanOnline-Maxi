@@ -2,7 +2,7 @@
   "tipo": "maxi_dumbbell8_export",
   "version": 1,
   "alumno": "Maxi",
-  "exportadoEl": "2026-08-22T18:14:33.753Z",
+  "exportadoEl": "2026-08-22T18:14:48.559Z",
   "tracking": {
     "s1_d0_f0_e0": {
       "resultado": "",
@@ -511,7 +511,7 @@
       "done": false
     },
     "s1_d2_f3_e0": {
-      "resultado": "",
+      "resultado": "completadas 2 rondas por cansancio",
       "comentario": "",
       "video": "",
       "done": false,
