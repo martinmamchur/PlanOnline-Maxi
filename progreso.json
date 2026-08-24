@@ -2,7 +2,7 @@
   "tipo": "maxi_dumbbell8_export",
   "version": 1,
   "alumno": "Maxi",
-  "exportadoEl": "2026-08-24T18:26:10.536Z",
+  "exportadoEl": "2026-08-24T18:29:04.477Z",
   "tracking": {
     "s1_d0_f0_e0": {
       "resultado": "",
@@ -570,7 +570,7 @@
         },
         {
           "kg": "11.5",
-          "reps": ""
+          "reps": "10"
         }
       ],
       "comentario": "kg por pancuerna",
