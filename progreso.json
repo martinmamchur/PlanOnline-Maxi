@@ -2,7 +2,7 @@
   "tipo": "maxi_dumbbell8_export",
   "version": 1,
   "alumno": "Maxi",
-  "exportadoEl": "2026-08-24T18:31:14.199Z",
+  "exportadoEl": "2026-08-24T18:31:39.997Z",
   "tracking": {
     "s1_d0_f0_e0": {
       "resultado": "",
@@ -582,6 +582,10 @@
         {
           "kg": "8",
           "reps": "10"
+        },
+        {
+          "kg": "9",
+          "reps": ""
         }
       ],
       "comentario": "kg por mancuerna",
