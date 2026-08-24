@@ -2,7 +2,7 @@
   "tipo": "maxi_dumbbell8_export",
   "version": 1,
   "alumno": "Maxi",
-  "exportadoEl": "2026-08-24T18:59:06.314Z",
+  "exportadoEl": "2026-08-24T18:59:11.032Z",
   "tracking": {
     "s1_d0_f0_e0": {
       "resultado": "",
@@ -178,7 +178,7 @@
       "done": false
     },
     "s1_d0_f3_e0": {
-      "resultado": "ejercicios completados en 1:20 ()",
+      "resultado": "ejercicios completados en 1:20 (1 ronda)",
       "comentario": "todos completos menos las flexiones de brazos que pude hacer 4",
       "video": "",
       "done": false,
