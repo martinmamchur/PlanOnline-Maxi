@@ -2,7 +2,7 @@
   "tipo": "maxi_dumbbell8_export",
   "version": 1,
   "alumno": "Maxi",
-  "exportadoEl": "2026-08-26T22:28:29.466Z",
+  "exportadoEl": "2026-08-26T22:28:35.260Z",
   "tracking": {
     "s1_d0_f0_e0": {
       "resultado": "",
@@ -673,51 +673,9 @@
       "video": "",
       "done": false,
       "videos": [
-        "https://youtube.com/shorts/KSM5vN4Jaqw?feature=share",
-        "https://youtube.com/shorts/0JaTa6eutfc?feature=share"
+        "",
+        ""
       ]
-    },
-    "s2_d1_f1_e0": {
-      "series": [
-        {
-          "kg": "4.5",
-          "reps": ""
-        }
-      ],
-      "comentario": "",
-      "video": "https://youtube.com/shorts/aF5tHdV4bT4?feature=share",
-      "done": false
-    },
-    "s2_d1_f0_e4": {
-      "resultado": "",
-      "comentario": "",
-      "video": "",
-      "done": false,
-      "videos": [
-        "https://youtube.com/shorts/aF5tHdV4bT4?feature=share"
-      ]
-    },
-    "s2_d1_f1_e1": {
-      "series": [
-        {
-          "kg": "5.5",
-          "reps": ""
-        }
-      ],
-      "comentario": "",
-      "video": "https://youtube.com/shorts/YSmg6OfTQlc?feature=share",
-      "done": false
-    },
-    "s2_d1_f1_e2": {
-      "series": [
-        {
-          "kg": "8",
-          "reps": ""
-        }
-      ],
-      "comentario": "",
-      "video": "https://youtube.com/shorts/V3Kg-KKji3w?feature=share",
-      "done": false
     }
   }
 }
