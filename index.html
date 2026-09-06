@@ -1072,7 +1072,26 @@ function SessionView({ semana, diaIdx, sesion, tracking, onChange, onToggleDayDo
           {dayDone?"✓ El alumno completo esta sesion":"El alumno aun no completo esta sesion"}
         </div>
       ):(
-        <button className={"complete-day-btn"+(dayDone?" done":"")} onClick={()=>onToggleDayDone(dk)}>
+        <button className={"complete-day-btn"+(dayDone?" done":"")} onClick={()=>{
+          if(!dayDone){
+            // Verificar ejercicios de fuerza sin registrar
+            const pendientes=[];
+            sesion.fases.forEach((fase,fi)=>{
+              if(isRealCR(fase)||isCardioOrMobility({nombre:fase.fase},fase.fase)) return;
+              fase.ejercicios.forEach((ej,ei)=>{
+                if(isCardioOrMobility(ej,fase.fase)) return;
+                const k=exKey(semana,diaIdx,fi,ei);
+                const entry=tracking[k];
+                const tieneDatos=entry&&entry.series&&entry.series.some(s=>s.kg||s.reps);
+                if(!tieneDatos) pendientes.push(ej.nombre);
+              });
+            });
+            if(pendientes.length>0){
+              alert('⚠️ Faltan '+pendientes.length+' ejercicio(s) sin registrar:\n\n'+pendientes.map(n=>'• '+n).join('\n')+'\n\nPodés completar igual si no pudiste hacerlos.');
+            }
+          }
+          onToggleDayDone(dk);
+        }}>
           {dayDone?"✓ Sesion marcada como completada":"Marcar sesion como completada"}
         </button>
       )}
