@@ -688,6 +688,25 @@ function parseIntensityBadge(intensidad){
    SIMPLE CARD — cardio, movilidad, activación, estiramiento
    Solo muestra info + campo de tiempo/resultado + comentario
    ══════════════════════════════════════════════════ */
+
+// ── Técnicas avanzadas ────────────────────────────────────────────────────────
+function getTechNote(name, series) {
+  const n = ((name||'') + ' ' + (series||'')).toLowerCase();
+  if (/myo.rep/i.test(n)) return {
+    title: '¿Cómo ejecutar los Myo-reps?',
+    text: '1. Hacé las reps indicadas con buena técnica (set activador). Dejá 1-2 reps en el tanque.\n2. Descansá SOLO 5 segundos.\n3. Hacé 3-5 reps más (mini-set).\n4. Descansá 5 seg. Repetí 3-4 veces más o hasta no poder hacer 3 reps.\n⏱ DESCANSO ENTRE SERIES: Recién al terminar todos los mini-sets descansás el tiempo indicado.'
+  };
+  if (/drop.set/i.test(n)) return {
+    title: '¿Cómo ejecutar un Drop Set?',
+    text: '1. Hacé las reps con tu peso habitual hasta el fallo.\n2. SIN descansar, bajá el peso un 20-30% y seguí hasta el fallo.\n⚠️ El drop entero cuenta como UNA sola serie.\n⏱ DESCANSO ENTRE SERIES: Recién después del drop completo descansás el tiempo indicado.'
+  };
+  if (/tempo|tempo lento/i.test(n)) return {
+    title: '¿Qué es el tempo lento?',
+    text: 'Bajá el peso contando 3 segundos (fase excéntrica). Subís con normalidad. Los descansos entre series no cambian.'
+  };
+  return null;
+}
+
 function SimpleCard({ semana, diaIdx, faseIdx, exIdx, ejercicio, tracking, onChange, readOnly }){
   const k=exKey(semana,diaIdx,faseIdx,exIdx);
   const data=tracking[k]||{resultado:"",comentario:"",video:"",done:false};
@@ -846,11 +865,75 @@ function ExerciseCard({ semana, diaIdx, faseIdx, exIdx, ejercicio, tracking, onC
           value={data.comentario||""} onChange={e=>upd({comentario:e.target.value})}
           readOnly={readOnly} className="ex2-textarea"/>
       </div>
+      {(()=>{
+        const tn=getTechNote(ejercicio.nombre, ejercicio.series);
+        if(!tn) return null;
+        return <div style={{background:"rgba(200,255,61,0.06)",borderLeft:"3px solid var(--lime)",borderRadius:"0 8px 8px 0",padding:"10px 12px",margin:"8px 0",fontSize:"12.5px",lineHeight:"1.6"}}>
+          <strong style={{color:"var(--lime)",display:"block",marginBottom:"4px"}}>📖 {tn.title}</strong>
+          <span style={{whiteSpace:"pre-wrap"}}>{tn.text}</span>
+        </div>;
+      })()}
+      <HistorialBtn ejercicio={ejercicio} semana={semana} diaIdx={diaIdx} tracking={tracking}/>
     </div>
   );
 }
 
 /* ── Decide qué card usar por ejercicio ── */
+
+function HistorialBtn({ ejercicio, semana, diaIdx, tracking }){
+  const [show, setShow] = React.useState(false);
+  const nameNorm = (ejercicio.nombre||'').toLowerCase().trim();
+
+  const findLast = () => {
+    let best = null;
+    for (const key of Object.keys(tracking)) {
+      if (!key.match(/^s\d+_d\d+_f\d+_e\d+$/)) continue;
+      const entry = tracking[key];
+      if (!entry || !entry.series || !entry.series.some(s=>s.kg||s.reps)) continue;
+      const m = key.match(/^s(\d+)_d(\d+)/);
+      const w = parseInt(m[1]), d = parseInt(m[2]);
+      if (w === semana && d === diaIdx) continue;
+      // Buscar nombre en el plan
+      try {
+        const sem = PROGRAMA.find(s=>s.semana===w);
+        if (!sem) continue;
+        const dia = sem.sesiones[d];
+        if (!dia) continue;
+        for (const fase of dia.fases||[]) {
+          for (const ej of fase.ejercicios||[]) {
+            if ((ej.nombre||'').toLowerCase().trim() === nameNorm) {
+              if (!best || w > best.w || (w === best.w && d > best.d)) {
+                best = { w, d, entry, dia: dia.dia };
+              }
+            }
+          }
+        }
+      } catch(e){}
+    }
+    return best;
+  };
+
+  const rec = show ? findLast() : null;
+
+  return <div>
+    <button onClick={()=>setShow(s=>!s)}
+      style={{background:"none",border:"1px solid var(--line-soft)",color:"var(--text-dim)",
+        borderRadius:"6px",padding:"4px 10px",fontSize:"11px",cursor:"pointer",marginTop:"6px"}}>
+      🕐 {show ? "Ocultar historial" : "Ver última vez"}
+    </button>
+    {show && <div style={{background:"var(--surface)",border:"1px solid var(--line-soft)",borderRadius:"8px",padding:"10px 12px",marginTop:"6px",fontSize:"12px",lineHeight:"1.6"}}>
+      {!rec
+        ? <div><div style={{fontSize:"11px",color:"var(--text-faint)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:"4px"}}>Sin registro previo</div>Este es el primer registro de este ejercicio.</div>
+        : <div>
+            <div style={{fontSize:"11px",color:"var(--text-faint)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:"4px"}}>Última vez: Semana {rec.w} · {rec.dia}</div>
+            {rec.entry.series.map((s,i)=> (s.kg||s.reps) ? <div key={i} style={{color:"var(--text)"}}>Serie {i+1}: <strong>{s.kg||"—"} kg</strong> × <strong>{s.reps||"—"} reps</strong></div> : null)}
+            {rec.entry.comentario && <div style={{marginTop:"6px",color:"var(--text-dim)",fontStyle:"italic"}}>💬 {rec.entry.comentario}</div>}
+          </div>
+      }
+    </div>}
+  </div>;
+}
+
 function AutoCard(props){
   if(isCardioOrMobility(props.ejercicio, props.faseNombre)){
     return <SimpleCard {...props}/>;
@@ -1192,7 +1275,20 @@ function App(){
     localStorage.setItem("maxi_readonly_mode", next?"1":"0");
   };
 
-  const handleChange=useCallback((key,val)=>{ if(!isReadOnly) setTracking(p=>({...p,[key]:val})); },[isReadOnly]);
+  const handleChange=useCallback((key,val)=>{
+    if(!isReadOnly){
+      setTracking(p=>{
+        const next={...p,[key]:val};
+        // Autosave con debounce 4 seg
+        if(handleChange._t) clearTimeout(handleChange._t);
+        handleChange._t=setTimeout(()=>{
+          const data={app:'plan-maxi',exportedAt:new Date().toISOString(),tracking:next};
+          ghSaveProgress(data);
+        },4000);
+        return next;
+      });
+    }
+  },[isReadOnly]);
   const handleToggleDay=useCallback((dk)=>{ if(!isReadOnly) setTracking(p=>({...p,[dk]:!p[dk]})); },[isReadOnly]);
 
   const handleReset=()=>{
