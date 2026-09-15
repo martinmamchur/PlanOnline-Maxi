@@ -2,7 +2,7 @@
   "tipo": "maxi_dumbbell8_export",
   "version": 1,
   "alumno": "Maxi",
-  "exportadoEl": "2026-09-15T23:31:08.512Z",
+  "exportadoEl": "2026-09-15T23:33:27.108Z",
   "tracking": {
     "s1_d0_f0_e0": {
       "resultado": "",
@@ -987,7 +987,7 @@
         },
         {
           "kg": "4.5",
-          "reps": ""
+          "reps": "8"
         }
       ],
       "comentario": "",
